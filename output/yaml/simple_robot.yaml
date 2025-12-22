@@ -1,0 +1,101 @@
+# Simple differential drive robot - Direct XML to YAML translation
+robot:
+  '@name': simple_diffbot
+
+  link:
+    - '@name': base_footprint
+
+    - '@name': base_link
+      visual:
+        geometry:
+          cylinder:
+            '@radius': '0.15'
+            '@length': '0.05'
+
+    - '@name': left_wheel
+      visual:
+        origin:
+          '@xyz': '0 0 0'
+          '@rpy': '1.57 0 0'
+        geometry:
+          cylinder:
+            '@radius': '0.05'
+            '@length': '0.03'
+
+    - '@name': right_wheel
+      visual:
+        origin:
+          '@xyz': '0 0 0'
+          '@rpy': '1.57 0 0'
+        geometry:
+          cylinder:
+            '@radius': '0.05'
+            '@length': '0.03'
+
+    - '@name': caster
+      visual:
+        geometry:
+          sphere:
+            '@radius': '0.025'
+
+    - '@name': lidar
+      visual:
+        geometry:
+          cylinder:
+            '@radius': '0.03'
+            '@length': '0.04'
+
+  joint:
+    - '@name': base_footprint_to_base_link
+      '@type': fixed
+      parent:
+        '@link': base_footprint
+      child:
+        '@link': base_link
+      origin:
+        '@xyz': '0 0 0.05'
+        '@rpy': '0 0 0'
+
+    - '@name': left_wheel_joint
+      '@type': continuous
+      parent:
+        '@link': base_link
+      child:
+        '@link': left_wheel
+      origin:
+        '@xyz': '0 0.12 -0.025'
+        '@rpy': '0 0 0'
+      axis:
+        '@xyz': '0 1 0'
+
+    - '@name': right_wheel_joint
+      '@type': continuous
+      parent:
+        '@link': base_link
+      child:
+        '@link': right_wheel
+      origin:
+        '@xyz': '0 -0.12 -0.025'
+        '@rpy': '0 0 0'
+      axis:
+        '@xyz': '0 1 0'
+
+    - '@name': caster_joint
+      '@type': fixed
+      parent:
+        '@link': base_link
+      child:
+        '@link': caster
+      origin:
+        '@xyz': '-0.12 0 -0.05'
+        '@rpy': '0 0 0'
+
+    - '@name': lidar_joint
+      '@type': fixed
+      parent:
+        '@link': base_link
+      child:
+        '@link': lidar
+      origin:
+        '@xyz': '0 0 0.045'
+        '@rpy': '0 0 0'

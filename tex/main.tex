@@ -1,0 +1,55 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,        % allow line breaks
+  breakatwhitespace=true, % break only at whitespace
+  columns=fullflexible    % better spacing for monospace
+}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{makecell}
+
+% Define a wrapped, ragged-right column type:
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{A YAML-Based Domain-Specific Language for Concise Robot Description in ROS2}
+
+\author{
+  Pito Salas \\
+  Brandeis University (Emeritus) \\
+  Boston Robot Hackers \\
+  \texttt{pito@example.org}
+}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Define a YAML style for listings
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\small,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  moredelim=[l][\color{orange}]{:},
+}
+\begin{document}
+\maketitle
+
+\input{abstract}
+\input{introduction}
+\input{background}
+\input{design_principles}
+\input{implementation}
+\input{results}
+\input{discussion}
+\input{conclusion}
+\input{acknowledgments}
+\input{references}
+\input{appendix}
+\end{document}

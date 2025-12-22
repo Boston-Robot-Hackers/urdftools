@@ -1,0 +1,208 @@
+robot: turtlebot3_waffle
+
+# Hierarchy - TF tree structure
+hierarchy:
+  base_footprint:
+    - base_link:
+        - wheel_left_link
+        - wheel_right_link
+        - caster_back_right_link
+        - caster_back_left_link
+        - imu_link
+        - base_scan
+        - camera_link:
+            - camera_rgb_frame:
+                - camera_rgb_optical_frame
+            - camera_depth_frame:
+                - camera_depth_optical_frame
+
+# Robot dimensions (meters, kg)
+params:
+  # Wheel dimensions
+  wheel_base: 0.288      # 0.144 * 2
+  wheel_diameter: 0.066  # radius 0.033 * 2
+  wheel_width: 0.018
+  wheel_x_offset: 0.0
+  wheel_z_offset: 0.023
+  floor_clearance: 0.010
+
+  # Base dimensions
+  base_x_offset: -0.064
+  base_collision_size: [0.266, 0.266, 0.094]
+  base_collision_z: 0.047
+
+  # Casters (two rear casters)
+  caster_x: -0.177
+  caster_y: 0.064
+  caster_z: -0.004
+  caster_size: [0.030, 0.009, 0.020]
+  caster_y_offset: 0.001
+
+  # Sensors
+  imu_z: 0.068
+  lidar_z: 0.122
+  lidar_collision_offset: 0.015
+  lidar_collision_z: -0.0065
+  lidar_radius: 0.055
+  lidar_height: 0.0315
+
+  # Intel RealSense R200 camera
+  camera_pos: [0.064, -0.065, 0.094]
+  camera_collision_offset: [0.003, 0.065, 0.007]
+  camera_collision_size: [0.012, 0.132, 0.020]
+  camera_rgb_offset: [0.005, 0.018, 0.013]
+  camera_depth_offset: [0.005, 0.028, 0.013]
+
+  # Masses
+  base_mass: 1.3729
+  wheel_mass: 0.0285
+  caster_mass: 0.005
+  lidar_mass: 0.114
+
+# Templates
+templates:
+  wheel:
+    mesh: {filename: "package://turtlebot3_description/meshes/wheels/left_tire.stl", scale: [0.001, 0.001, 0.001]}
+    material: dark
+    joint_type: continuous
+    axis: z  # Z-axis in rotated frame (after rot_x: -90deg)
+    mass: {wheel_mass}
+    collision:
+      cylinder: [{wheel_diameter/2}, {wheel_width}]
+
+  caster:
+    # No visual geometry (skid plates)
+    mass: {caster_mass}
+    collision:
+      origin: [0, {caster_y_offset}, 0]
+      box: {caster_size}
+    inertial:
+      origin: [0, 0, 0]
+      inertia: {ixx: 0.001, ixy: 0.0, ixz: 0.0, iyy: 0.001, iyz: 0.0, izz: 0.001}
+
+# Links
+links:
+  # Ground projection (root frame)
+  base_footprint:
+    # Virtual link, no geometry
+
+  # Main body
+  base_link:
+    origin: [0, 0, {floor_clearance}]
+    mesh: {filename: "package://turtlebot3_description/meshes/bases/waffle_base.stl", scale: [0.001, 0.001, 0.001]}
+    material: gray
+    mass: {base_mass}
+    collision:
+      origin: [{base_x_offset}, 0, {base_collision_z}]
+      box: {base_collision_size}
+    inertial:
+      origin: [0, 0, 0]
+      inertia: {ixx: 8.7002718e-03, ixy: -4.7576583e-05, ixz: 1.1160499e-04,
+                iyy: 8.6195418e-03, iyz: -3.5422299e-06, izz: 1.4612727e-02}
+
+  # Drive wheels (mirrored)
+  wheels:
+    template: wheel
+    mirror_y: {xyz: [{wheel_x_offset}, {wheel_base/2}, {wheel_z_offset}], rot_x: -90deg}
+
+  # Rear casters (mirrored, using template)
+  casters:
+    template: caster
+    mirror_y: {xyz: [{caster_x}, {caster_y}, {caster_z}], rot_x: -90deg}
+
+  # IMU sensor
+  imu_link:
+    origin: [0, 0, {imu_z}]
+    # Virtual link, no geometry
+
+  # LiDAR sensor
+  base_scan:
+    origin: [{base_x_offset}, 0, {lidar_z}]
+    mesh: {filename: "package://turtlebot3_description/meshes/sensors/lds.stl", scale: [0.001, 0.001, 0.001]}
+    material: dark
+    mass: {lidar_mass}
+    collision:
+      origin: [{lidar_collision_offset}, 0, {lidar_collision_z}]
+      cylinder: [{lidar_radius}, {lidar_height}]
+    inertial:
+      origin: [0, 0, 0]
+      inertia: {ixx: 0.001, ixy: 0.0, ixz: 0.0, iyy: 0.001, iyz: 0.0, izz: 0.001}
+
+  # Intel RealSense R200 depth camera
+  camera_link:
+    origin: {camera_pos}
+    mesh: {filename: "package://turtlebot3_description/meshes/sensors/r200.dae"}
+    collision:
+      origin: {camera_collision_offset}
+      box: {camera_collision_size}
+
+  # RGB camera frame
+  camera_rgb_frame:
+    origin: {camera_rgb_offset}
+    # Virtual link, no geometry
+
+  # RGB optical frame (standard camera orientation)
+  camera_rgb_optical_frame:
+    origin: {xyz: [0, 0, 0], rpy: [-90deg, 0, -90deg]}
+    # Virtual link, no geometry
+
+  # Depth camera frame
+  camera_depth_frame:
+    origin: {camera_depth_offset}
+    # Virtual link, no geometry
+
+  # Depth optical frame (standard camera orientation)
+  camera_depth_optical_frame:
+    origin: {xyz: [0, 0, 0], rpy: [-90deg, 0, -90deg]}
+    # Virtual link, no geometry
+
+# ==============================================================================
+# NOTES ON TURTLEBOT3 WAFFLE
+# ==============================================================================
+#
+# TurtleBot3 Waffle - larger model with Intel RealSense depth camera.
+#
+# ROBOT STRUCTURE:
+# - Differential drive mobile robot
+# - Two drive wheels (continuous joints)
+# - Two rear casters (left and right skid plates)
+# - 360° LDS LiDAR sensor
+# - 9-axis IMU sensor
+# - Intel RealSense R200 RGB-D camera
+# - Wider wheelbase for better stability
+#
+# KEY SPECIFICATIONS:
+# - Wheelbase: 288mm (wider than Burger's 160mm)
+# - Wheel diameter: 66mm (same as Burger)
+# - Base size: 266mm x 266mm x 94mm
+# - Mass: ~1.37kg base + sensors
+# - Camera: Intel RealSense R200 (RGB + depth)
+#
+# COMPARISON TO ORIGINAL URDF:
+# Original: 294 lines (with material definitions, camera optical frames)
+# DSL:      ~145 lines
+# Reduction: 51%
+#
+# COORDINATE FRAMES:
+# - base_footprint: ground projection
+# - base_link: robot center
+# - camera_rgb_optical_frame: RGB camera in ROS optical frame convention
+# - camera_depth_optical_frame: Depth camera in ROS optical frame convention
+# - base_scan: 360° LiDAR
+#
+# HIERARCHY (TF tree):
+# base_footprint (ground)
+# └── base_link (main body)
+#     ├── wheel_left_link (continuous)
+#     ├── wheel_right_link (continuous)
+#     ├── caster_back_left_link (rear left)
+#     ├── caster_back_right_link (rear right)
+#     ├── imu_link (9-axis IMU)
+#     ├── base_scan (360° LiDAR)
+#     └── camera_link (Intel RealSense R200)
+#         ├── camera_rgb_frame
+#         │   └── camera_rgb_optical_frame (ROS camera convention)
+#         └── camera_depth_frame
+#             └── camera_depth_optical_frame (ROS camera convention)
+#
+# ==============================================================================

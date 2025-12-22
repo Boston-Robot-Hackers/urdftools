@@ -1,0 +1,106 @@
+\appendices
+\section{Example Models: DSL and Generated URDF}
+
+This appendix illustrates two representative models. Each example shows the concise YAML‑based DSL \cite{dsl_ref,yaml_ref} description alongside the expanded URDF \cite{urdf_ref} output.
+
+\subsection{Example 1: Trivial Mobile Robot}
+
+\textbf{Input DSL}\\
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,breakatwhitespace=true,columns=fullflexible]
+robot: mobile_base
+hierarchy:
+  base_link:
+    - left_wheel
+    - right_wheel
+
+links:
+  base_link:
+    geometry: {box: {size: [0.4, 0.3, 0.1]}}
+  left_wheel:
+    geometry: {cylinder: {radius: 0.05, length: 0.02}}
+  right_wheel:
+    geometry: {cylinder: {radius: 0.05, length: 0.02}}
+
+joints:
+  left_wheel_joint:
+    parent: base_link
+    child: left_wheel
+    type: continuous
+    origin: {xyz: [0, 0.15, -0.05]}
+  right_wheel_joint:
+    parent: base_link
+    child: right_wheel
+    type: continuous
+    origin: {xyz: [0, -0.15, -0.05]}
+\end{lstlisting}
+
+\textbf{Output URDF}\\
+\begin{lstlisting}[language=xml,basicstyle=\ttfamily\small,breaklines=true,breakatwhitespace=true,columns=fullflexible]
+<link name="base_link">
+  <visual>
+    <geometry><box size="0.4 0.3 0.1"/></geometry>
+  </visual>
+</link>
+<link name="left_wheel">
+  <visual>
+    <geometry><cylinder radius="0.05" length="0.02"/></geometry>
+  </visual>
+</link>
+<link name="right_wheel">
+  <visual>
+    <geometry><cylinder radius="0.05" length="0.02"/></geometry>
+  </visual>
+</link>
+<joint name="left_wheel_joint" type="continuous">
+  <parent link="base_link"/>
+  <child link="left_wheel"/>
+  <origin xyz="0 0.15 -0.05"/>
+</joint>
+<joint name="right_wheel_joint" type="continuous">
+  <parent link="base_link"/>
+  <child link="right_wheel"/>
+  <origin xyz="0 -0.15 -0.05"/>
+</joint>
+\end{lstlisting}
+
+\subsection{Example 2: Dome1 Robot}
+
+\textbf{Input DSL}\\
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,breakatwhitespace=true,columns=fullflexible]
+robot: dome1
+hierarchy:
+  dome_base:
+    - dome_top
+
+links:
+  dome_base:
+    geometry: {cylinder: {radius: 0.2, length: 0.05}}
+  dome_top:
+    geometry: {sphere: {radius: 0.2}}
+
+joints:
+  dome_joint:
+    parent: dome_base
+    child: dome_top
+    type: fixed
+    origin: {xyz: [0, 0, 0.05]}
+\end{lstlisting}
+
+\textbf{Output URDF}\\
+\begin{lstlisting}[language=xml,basicstyle=\ttfamily\small,breaklines=true,breakatwhitespace=true,columns=fullflexible]
+<link name="dome_base">
+  <visual>
+    <geometry><cylinder radius="0.2" length="0.05"/></geometry>
+  </visual>
+</link>
+<link name="dome_top">
+  <visual>
+    <geometry><sphere radius="0.2"/></geometry>
+  </visual>
+</link>
+<joint name="dome_joint" type="fixed">
+  <parent link="dome_base"/>
+  <child link="dome_top"/>
+  <origin xyz="0 0 0.05"/>
+</joint>
+\end{lstlisting}

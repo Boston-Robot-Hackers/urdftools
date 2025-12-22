@@ -1,0 +1,16 @@
+\section{Discussion}
+The evaluation of the YAML-based DSL \cite{yaml_ref,dsl_ref} against URDF \cite{urdf_ref} and Xacro highlights several broader implications for the ROS2 \cite{ros2_ref} community.
+
+\subsection{Educational Impact}
+By replacing XML with YAML \cite{yaml_ref}, the DSL lowers the barrier to entry for students and newcomers. The flat syntax and explicit hierarchy make robot descriptions easier to understand, reducing onboarding time and minimizing frustration in introductory robotics courses.
+
+\subsection{Community Adoption}
+Because the DSL compiles directly to URDF \cite{urdf_ref}, it can be adopted incrementally without disrupting existing ROS2 workflows. Developers can continue to rely on familiar tools such as \texttt{rviz2}, Gazebo, and \texttt{robot\_state\_publisher}, while benefiting from the conciseness of the DSL. This compatibility makes gradual migration feasible across diverse projects.
+
+\subsection{Maintainability}
+Explicit hierarchies and reusable templates reduce long-term maintenance costs, especially for complex robots with repeated structures. Parameter substitution ensures consistency when adjusting dimensions or inertial properties, lowering the risk of errors. These features align with best practices in software engineering, where modularity and clarity are critical for sustainability.
+
+\subsection{Future Extensibility}
+The DSL \cite{dsl_ref} provides a foundation for integrating higher-level abstractions, such as semantic robot types or automated validation against REP standards. Its YAML basis \cite{yaml_ref} makes it straightforward to extend with new fields or generators, enabling community-driven evolution. This extensibility positions the DSL as a candidate for broader adoption beyond ROS2 \cite{ros2_ref}, potentially influencing future standards for robot description.
+
+Overall, the DSL demonstrates that concise, human-readable formats can coexist with established XML-based specifications. By bridging educational accessibility with technical rigor, it offers a pathway toward more maintainable and inclusive robot description practices in ROS2.conclusion

@@ -1,0 +1,34 @@
+\section{Implementation}
+The YAML-based DSL \cite{yaml_ref,dsl_ref} was implemented as a lightweight compiler that translates concise YAML descriptions into canonical URDF \cite{urdf_ref} files. The implementation emphasizes reproducibility, compatibility with ROS2 \cite{ros2_ref} tooling, and ease of integration into existing workflows.
+
+\subsection{Compiler Pipeline}
+The compiler follows a three-stage pipeline:
+\begin{enumerate}
+  \item \textbf{Parsing}: YAML input is parsed into an abstract syntax tree (AST). Parameters, templates, and hierarchy declarations are resolved at this stage.
+  \item \textbf{Expansion}: Templates and generators are expanded, variable substitutions are applied, and smart defaults are injected.
+  \item \textbf{Emission}: The AST is serialized into URDF XML. Each DSL construct maps directly to a URDF element, ensuring compatibility with ROS2 visualization, simulation, and control tools.
+\end{enumerate}
+
+\subsection{Validation}
+Validation is performed both during parsing and emission:
+\begin{itemize}
+  \item \textbf{Schema checks}: Each block (links, joints, hierarchy, type) is validated against a schema to ensure required fields are present.
+  \item \textbf{Consistency checks}: Hierarchy declarations are verified against defined links and joints. Robot type declarations are checked against ROS conventions (e.g., REP-105, REP-120).
+  \item \textbf{Numerical checks}: Mass, inertia, and geometry parameters are validated for physical plausibility.
+\end{itemize}
+
+\subsection{Syntax Rules}
+The DSL \cite{dsl_ref} introduces a small set of syntax rules designed for clarity:
+\begin{itemize}
+  \item \textbf{Flat fields}: Each link or joint is described with top-level fields rather than nested XML.
+  \item \textbf{Explicit hierarchy}: Parent-child relationships are declared in a dedicated hierarchy block.
+  \item \textbf{Parameter substitution}: Parameters can be defined once and reused with arithmetic expressions.
+  \item \textbf{Templates}: Components can be defined once and instantiated multiple times, with support for mirroring and instancing.
+  \item \textbf{Materials}: Semantic names replace verbose RGBA definitions, though custom materials remain supported.
+\end{itemize}
+
+\subsection{Integration with ROS2}
+The compiler outputs standard URDF \cite{urdf_ref} files that can be consumed by ROS2 \cite{ros2_ref} packages such as \texttt{robot\_state\_publisher}, \texttt{rviz2}, and Gazebo. Because the DSL \cite{dsl_ref} is a strict superset of URDF semantics, no modifications to downstream tools are required. Developers can continue to use existing ROS2 workflows while benefiting from the conciseness and readability of the DSL.
+
+\subsection{Implementation Footprint}
+The compiler is implemented in fewer than 1,000 lines of Python, relying on widely available libraries for YAML \cite{yaml_ref} parsing and XML generation. This makes the tool lightweight, easy to audit, and simple to extend. The design emphasizes transparency and reproducibility, aligning with the educational goals of the project.

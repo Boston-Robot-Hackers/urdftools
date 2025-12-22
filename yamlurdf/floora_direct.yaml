@@ -1,0 +1,287 @@
+# ==============================================================================
+# DIRECT XML→YAML CONVERSION OF floora.urdf
+# ==============================================================================
+# This shows what a straightforward XML→YAML conversion looks like
+# - XML elements become YAML keys
+# - XML attributes are prefixed with @
+# - Xacro properties and macros are preserved as-is
+# - No semantic simplification
+# ==============================================================================
+
+robot:
+  '@name': floora
+  '@xmlns:xacro': http://ros.org/wiki/xacro
+
+  # Xacro properties (parametric values)
+  'xacro:property':
+    - '@name': base_radius
+      '@value': '0.1495'
+    - '@name': base_thickness
+      '@value': '0.012'
+    - '@name': base_height
+      '@value': '0.089'
+    - '@name': wheel_radius
+      '@value': '0.037'
+    - '@name': wheel_width
+      '@value': '0.020'
+    - '@name': wheel_ygap
+      '@value': '0.001'
+    - '@name': wheel_zoff
+      '@value': '0.052'
+    - '@name': caster_radius
+      '@value': '0.0125'
+    - '@name': caster_xgap
+      '@value': '-0.005'
+    - '@name': caster_bearing_radius
+      '@value': '0.015'
+    - '@name': caster_bearing_width
+      '@value': '0.010'
+    - '@name': caster_bearing_off
+      '@value': '${base_radius}'
+    - '@name': caster_bearing_zoff
+      '@value': '0.041'
+    - '@name': caster_wheel_radius
+      '@value': '0.019'
+    - '@name': caster_wheel_width
+      '@value': '0.008625'
+    - '@name': caster_wheel_xoff
+      '@value': '0.021'
+    - '@name': caster_wheel_zoff
+      '@value': '0.029'
+    - '@name': collision_margin
+      '@value': '0.002'
+    - '@name': base_visual_zoff
+      '@value': '-0.006'
+    - '@name': base_collision_height
+      '@value': '0.030'
+    - '@name': base_mass
+      '@value': '2.5'
+    - '@name': wheel_mass
+      '@value': '0.2'
+    - '@name': caster_bearing_mass
+      '@value': '0.05'
+    - '@name': caster_wheel_mass
+      '@value': '0.05'
+    - '@name': base_ixx
+      '@value': '0.0141'
+    - '@name': base_iyy
+      '@value': '0.0141'
+    - '@name': base_izz
+      '@value': '0.0279'
+    - '@name': wheel_ixx
+      '@value': '0.000015'
+    - '@name': wheel_iyy
+      '@value': '0.000015'
+    - '@name': wheel_izz
+      '@value': '0.000027'
+    - '@name': caster_bearing_ixx
+      '@value': '0.000001'
+    - '@name': caster_bearing_iyy
+      '@value': '0.000001'
+    - '@name': caster_bearing_izz
+      '@value': '0.000001'
+    - '@name': caster_wheel_ixx
+      '@value': '0.000003'
+    - '@name': caster_wheel_iyy
+      '@value': '0.000003'
+    - '@name': caster_wheel_izz
+      '@value': '0.000002'
+    - '@name': caster_fl_angle
+      '@value': '45.0'
+    - '@name': caster_bl_angle
+      '@value': '135.0'
+    - '@name': caster_br_angle
+      '@value': '225.0'
+    - '@name': caster_fr_angle
+      '@value': '315.0'
+    - '@name': bamboo_r
+      '@value': '0.89'
+    - '@name': bamboo_g
+      '@value': '0.87'
+    - '@name': bamboo_b
+      '@value': '0.77'
+    - '@name': bamboo_a
+      '@value': '1.0'
+    - '@name': gray_r
+      '@value': '0.5'
+    - '@name': gray_g
+      '@value': '0.5'
+    - '@name': gray_b
+      '@value': '0.5'
+    - '@name': gray_a
+      '@value': '1.0'
+    - '@name': cyan_r
+      '@value': '0.0'
+    - '@name': cyan_g
+      '@value': '1.0'
+    - '@name': cyan_b
+      '@value': '1.0'
+    - '@name': cyan_a
+      '@value': '1.0'
+
+  # Links
+  link:
+    - '@name': base_footprint
+
+    - '@name': base_link
+      visual:
+        geometry:
+          cylinder:
+            '@radius': '${base_radius}'
+            '@length': '${base_thickness}'
+        origin:
+          '@xyz': '0 0 ${base_visual_zoff}'
+        material:
+          '@name': Bamboo
+          color:
+            '@rgba': '${bamboo_r} ${bamboo_g} ${bamboo_b} ${bamboo_a}'
+      collision:
+        geometry:
+          cylinder:
+            '@radius': '${base_radius}'
+            '@length': '${base_collision_height}'
+        origin:
+          '@xyz': '0 0 ${-base_collision_height/2}'
+      inertial:
+        origin:
+          '@xyz': '0 0 0'
+          '@rpy': '0 0 0'
+        mass:
+          '@value': '${base_mass}'
+        inertia:
+          '@ixx': '${base_ixx}'
+          '@ixy': '0.0'
+          '@ixz': '0.0'
+          '@iyy': '${base_iyy}'
+          '@iyz': '0.0'
+          '@izz': '${base_izz}'
+
+  # Joints
+  joint:
+    - '@name': base_joint
+      '@type': fixed
+      parent:
+        '@link': base_footprint
+      child:
+        '@link': base_link
+      origin:
+        '@xyz': '0.0 0.0 ${wheel_zoff+wheel_radius}'
+        '@rpy': '0 0 0'
+
+  # Xacro macros for wheels
+  'xacro:macro':
+    - '@name': wheel
+      '@params': 'prefix reflect'
+      link:
+        '@name': '${prefix}_link'
+        visual:
+          origin:
+            '@xyz': '0 0 0'
+            '@rpy': '${pi/2} 0 0'
+          geometry:
+            cylinder:
+              '@radius': '${wheel_radius}'
+              '@length': '${wheel_width}'
+          material:
+            '@name': Gray
+            color:
+              '@rgba': '${gray_r} ${gray_g} ${gray_b} ${gray_a}'
+        collision:
+          origin:
+            '@xyz': '0 0 0'
+            '@rpy': '${pi/2} 0 0'
+          geometry:
+            cylinder:
+              '@radius': '${wheel_radius}'
+              '@length': '${wheel_width}'
+        inertial:
+          origin:
+            '@xyz': '0 0 0'
+            '@rpy': '${pi/2} 0 0'
+          mass:
+            '@value': '${wheel_mass}'
+          inertia:
+            '@ixx': '${wheel_ixx}'
+            '@ixy': '0.0'
+            '@ixz': '0.0'
+            '@iyy': '${wheel_iyy}'
+            '@iyz': '0.0'
+            '@izz': '${wheel_izz}'
+      joint:
+        '@name': '${prefix}_joint'
+        '@type': continuous
+        parent:
+          '@link': base_link
+        child:
+          '@link': '${prefix}_link'
+        origin:
+          '@xyz': '0 ${reflect*(base_radius+wheel_ygap+wheel_width/2)} ${wheel_zoff}'
+          '@rpy': '0 0 0'
+        axis:
+          '@xyz': '0 1 0'
+
+  # Macro invocations
+  'xacro:wheel':
+    - '@prefix': wheel_left
+      '@reflect': '1'
+    - '@prefix': wheel_right
+      '@reflect': '-1'
+
+  'xacro:caster':
+    - '@prefix': caster_fl
+      '@angle': '${caster_fl_angle}'
+      '@front_or_back': front
+    - '@prefix': caster_bl
+      '@angle': '${caster_bl_angle}'
+      '@front_or_back': back
+    - '@prefix': caster_br
+      '@angle': '${caster_br_angle}'
+      '@front_or_back': back
+    - '@prefix': caster_fr
+      '@angle': '${caster_fr_angle}'
+      '@front_or_back': front
+
+# ==============================================================================
+# ANALYSIS: Direct XML→YAML Conversion
+# ==============================================================================
+#
+# Original URDF: 299 lines (including ~70 lines of comments)
+# Direct YAML:   ~230 lines
+# Savings:       ~23% reduction
+#
+# PROS:
+# + Minimal learning curve (same structure as XML)
+# + Automated conversion possible
+# + Preserves all xacro features (properties, macros)
+# + One-to-one mapping from XML
+# + Slightly more readable (no closing tags)
+#
+# CONS:
+# - Still very verbose
+# - All xacro syntax preserved (${}, macros, etc.)
+# - @ prefixes for attributes are ugly
+# - Nested structure still complex
+# - No semantic simplification
+# - Users still need to know xacro
+# - Minimal readability improvement
+# - Does NOT reduce cognitive load
+# - Still need to understand macros and parameters
+#
+# COMPARISON TO SEMANTIC DSL:
+# The semantic DSL approach (like in dslurdf project) achieves:
+# - 50%+ reduction in lines
+# - Much simpler syntax (no @ prefixes, no ${})
+# - Templates instead of xacro macros
+# - Mirror patterns instead of reflect parameters
+# - Geometry shortcuts: cylinder: [r, l]
+# - No xacro knowledge required
+# - Direct hierarchy visualization
+#
+# CONCLUSION:
+# Direct XML→YAML conversion provides modest benefit (~20-25% reduction)
+# Semantic DSL provides major benefit (~50% reduction + much simpler syntax)
+#
+# USER LEARNING:
+# - Direct YAML: Must still learn xacro (macros, ${}, params)
+# - Semantic DSL: Learn new but simpler concepts (templates, mirrors, shortcuts)
+# ==============================================================================

@@ -1,0 +1,186 @@
+robot: makerspet_loki
+
+# Hierarchy - TF tree structure
+hierarchy:
+  base_footprint:
+    - base_link:
+        - caster_link
+        - wheel_left_link
+        - wheel_right_link
+        - base_scan
+        - base_upper_link:
+            - head_link:
+                - tablet_link:
+                    - color_camera_link
+                    - imu_link
+
+# Robot dimensions (meters, kg)
+params:
+  # Wheel dimensions
+  wheel_diameter: 0.067
+  wheel_width: 0.029
+  wheel_base: 0.159063
+
+  # Caster
+  caster_diameter: 0.04
+  caster_inset: 0.0386  # Caster center to base edge
+
+  # Base dimensions
+  floor_clearance: 0.018
+  base_diameter: 0.2042
+  lower_cylinder_height: 0.1227
+
+  # Upper structure
+  lower_to_upper_cylinders_gap: 0.0195
+  laser_puck_to_upper_cylinder_gap: 0.0022
+  laser_puck_diameter: 0.0656
+  upper_cylinder_height: 0.003
+
+  # Head and tablet
+  head_height: 0.09
+  tablet_width: 0.1669
+  tablet_height: 0.0781
+  tablet_thickness: 0.009
+  tablet_pitch_angle: 20deg
+  tablet_inset: 0.07  # Upper cylinder's front to tablet bottom's center
+
+  # Camera
+  color_camera_diameter: 0.004
+  color_camera_thickness: 0.0001
+  color_camera_inset: 0.008  # Tablet edge to camera center
+
+  # IMU
+  imu_size: [0.001, 0.002, 0.004]
+
+  # Masses
+  lower_cylinder_mass: 0.500
+  caster_mass: 0.420
+  wheel_mass: 0.050
+  laser_puck_mass: 0.200
+  upper_cylinder_mass: 0.100
+  head_mass: 0.200
+  tablet_mass: 0.200
+
+# Templates
+templates:
+  wheel:
+    cylinder: [{wheel_diameter/2}, {wheel_width}]
+    material: blue
+    joint_type: continuous
+    axis: z  # Z-axis in rotated frame (after rot_x: -90deg)
+    mass: {wheel_mass}
+
+# Links
+links:
+  # Ground projection (root frame)
+  base_footprint:
+    # Virtual link, no geometry
+
+  # Main body - lower cylinder
+  base_link:
+    origin: [0, 0, {floor_clearance + lower_cylinder_height/2}]
+    cylinder: [{base_diameter/2}, {lower_cylinder_height}]
+    material: white
+    mass: {lower_cylinder_mass}
+
+  # Front caster ball
+  caster_link:
+    origin: [{base_diameter/2 - caster_inset}, 0, {caster_diameter/2}]
+    sphere: {caster_diameter/2}
+    material: yellow
+    mass: {caster_mass}
+
+  # Drive wheels (mirrored)
+  wheels:
+    template: wheel
+    mirror_y: {xyz: [0, {wheel_base/2}, {wheel_diameter/2}], rot_x: -90deg}
+
+  # Lidar sensor puck
+  base_scan:
+    origin: [0, 0, {floor_clearance + lower_cylinder_height + (lower_to_upper_cylinders_gap - laser_puck_to_upper_cylinder_gap)/2}]
+    cylinder: [{laser_puck_diameter/2}, {lower_to_upper_cylinders_gap - laser_puck_to_upper_cylinder_gap}]
+    material: blue
+    mass: {laser_puck_mass}
+
+  # Upper cylinder/plate
+  base_upper_link:
+    origin: [0, 0, {floor_clearance + lower_cylinder_height + lower_to_upper_cylinders_gap + upper_cylinder_height/2}]
+    cylinder: [{base_diameter/2}, {upper_cylinder_height}]
+    material: white
+    mass: {upper_cylinder_mass}
+
+  # Head (dome shape - using mesh for visual, cylinder for collision)
+  head_link:
+    origin: [0, 0, {upper_cylinder_height + head_height/2}]
+    mesh: {filename: "package://makerspet_loki/mesh/head.stl", scale: [{0.001*base_diameter}, {0.001*base_diameter}, {0.001*head_height*2}]}
+    material: red
+    mass: {head_mass}
+    collision:
+      cylinder: [{base_diameter/2}, {head_height}]
+
+  # Tablet display (pitched forward)
+  tablet_link:
+    origin: {xyz: [{base_diameter/2 - tablet_inset}, 0, {tablet_height/2}], rot_y: {-tablet_pitch_angle}}
+    box: [{tablet_thickness}, {tablet_width}, {tablet_height}]
+    material: gray
+    mass: {tablet_mass}
+
+  # Color camera on tablet
+  color_camera_link:
+    origin: {xyz: [{tablet_thickness/2 - color_camera_thickness}, {color_camera_inset - tablet_width/2}, {tablet_height/2}], rot_y: 90deg}
+    cylinder: [{color_camera_diameter/2}, {color_camera_thickness}]
+    material: white
+
+  # IMU sensor on tablet
+  imu_link:
+    origin: [0, 0, {tablet_height/2}]
+    box: {imu_size}
+    material: black
+
+# ==============================================================================
+# NOTES ON MAKERSPET LOKI ROBOT
+# ==============================================================================
+#
+# This is a differential drive mobile robot with:
+# - Cylindrical two-tier body (lower and upper cylinders)
+# - Two drive wheels (continuous joints)
+# - Front spherical caster for stability
+# - Lidar sensor puck between lower and upper cylinders
+# - Dome-shaped head (mesh geometry)
+# - Pitched tablet display with camera and IMU
+#
+# COMPARISON TO ORIGINAL URDF:
+# Original: 642 lines (with macros, materials, Gazebo config)
+# DSL:      ~150 lines (77% reduction)
+#
+# KEY FEATURES DEMONSTRATED:
+# 1. Complex hierarchy with nested components (head -> tablet -> sensors)
+# 2. Mesh geometry for visual (head.stl)
+# 3. Explicit collision override (head uses cylinder collision)
+# 4. Mirror pattern for wheels with rotation
+# 5. Multiple coordinate transformations (tablet pitch, camera rotation)
+# 6. Arithmetic expressions in origin calculations
+# 7. Named materials matching URDF colors
+#
+# HIERARCHY (TF tree):
+# base_footprint (ground)
+# └── base_link (main body at floor_clearance height)
+#     ├── caster_link (front ball caster)
+#     ├── wheel_left_link (continuous)
+#     ├── wheel_right_link (continuous)
+#     ├── base_scan (lidar puck)
+#     ├── base_upper_link (upper cylinder/plate)
+#     │   └── head_link (dome-shaped head)
+#     │       └── tablet_link (display, pitched forward)
+#     │           ├── color_camera_link (camera on tablet)
+#     │           └── imu_link (IMU sensor)
+#
+# GAZEBO CONFIGURATION (not included in core DSL):
+# - Differential drive controller (wheel_base, wheel_diameter, torque limits)
+# - Lidar sensor (360° scan, 12m range, 9Hz update)
+# - RGB camera (720x480, 15Hz, 80° FOV)
+# - IMU sensor (100Hz update, Gaussian noise)
+# - Friction coefficients (mu1/mu2 = 0.2 for wheels/caster)
+# - Joint state publisher (30Hz update)
+#
+# ==============================================================================

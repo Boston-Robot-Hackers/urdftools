@@ -1,0 +1,54 @@
+# Simple differential drive robot - Semantic YAML DSL
+robot: simple_diffbot
+
+# Hierarchy shows the TF tree structure
+hierarchy:
+  base_footprint:
+    - base_link:
+        - left_wheel
+        - right_wheel
+        - caster
+        - lidar
+
+# Parameters
+params:
+  base_radius: 0.15
+  base_height: 0.05
+  wheel_radius: 0.05
+  wheel_width: 0.03
+  wheel_separation: 0.24
+  caster_radius: 0.025
+  lidar_radius: 0.03
+  lidar_height: 0.04
+
+# Link definitions
+links:
+  base_footprint:
+    # Virtual link, no geometry
+
+  base_link:
+    cylinder: [{base_radius}, {base_height}]
+    joint_origin: {xyz: [0, 0, {base_height}]}
+
+  # Wheels using template and mirroring
+  wheels:
+    template: wheel
+    mirror_y:
+      names: [left_wheel, right_wheel]
+      origin: {xyz: [0, {wheel_separation/2}, -0.025]}
+
+  caster:
+    sphere: {caster_radius}
+    origin: {xyz: [-0.12, 0, -0.05]}
+
+  lidar:
+    cylinder: [{lidar_radius}, {lidar_height}]
+    origin: {xyz: [0, 0, 0.045]}
+
+# Templates for reusable components
+templates:
+  wheel:
+    cylinder: [{wheel_radius}, {wheel_width}]
+    origin: {rpy: [90deg, 0, 0]}
+    joint_type: continuous
+    axis: [0, 1, 0]

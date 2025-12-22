@@ -1,0 +1,28 @@
+\section{Design Principles}
+Our YAML-based DSL \cite{yaml_ref,dsl_ref} is guided by seven design principles that directly address the limitations of URDF \cite{urdf_ref} and Xacro. These principles are informed by ROS standards such as REP-105 (Coordinate Frames), REP-120 (Robot Model Representation), and REP-199 (URDF Inertial Specification) \cite{rep105,rep120,rep199}.
+
+\begin{table*}[ht]
+\centering
+\caption{Design Principles of the YAML-based DSL}
+\begin{tabularx}{\textwidth}{|L{3.0cm}|L{7.0cm}|>{\ttfamily\small}X|}
+\hline
+\textbf{Principle} & \textbf{Description} & \textbf{Example (wrapped inline)} \\
+\hline
+Flat Syntax & Geometry, materials, and inertial properties expressed as top-level fields rather than nested XML. Improves readability and reduces structural overhead. & cylinder: {radius: 0.14, length: 0.003} vs. <cylinder radius="0.14" length="0.003"/> \\
+\hline
+Separate Hierarchy Section & TF tree structure declared explicitly in a dedicated block, making parent-child relationships visible at a glance. & hierarchy: base\_footprint: - base\_link: - left\_wheel \\
+\hline
+Smart Defaults & Collision geometry defaults to visual geometry; inertia auto-calculated; origin defaults to [0,0,0]; joints default to fixed. & joint: fixed (default) \\
+\hline
+Templates and Generators & Reusable templates and mirroring/instancing mechanisms eliminate repetition and enforce consistency across symmetric structures. & template: wheel; names: [left\_wheel, right\_wheel] \\
+\hline
+Variable Substitution & Parameters defined once can be reused with arithmetic expressions, improving maintainability and reducing errors. & origin: {xyz: [0, {wheel\_base/2}, -{wheel\_diameter/2}]} \\
+\hline
+Named Material Library & Predefined semantic names (e.g., steel, plum, charcoal) replace verbose RGBA definitions, improving clarity. & material: steel (instead of rgba="0.7 0.7 0.7 1.0") \\
+\hline
+Robot Type Declaration & A type block validates the robot against ROS conventions, ensuring consistency with platform, drive type, and sensor suite. & type: {platform: mobile\_platform, drive\_type: differential} \\
+\hline
+\end{tabularx}
+\end{table*}
+
+Together, these principles reduce verbosity, expose robot hierarchies, and improve readability. They enable concise yet expressive robot descriptions that remain fully compatible with ROS2 \cite{ros2_ref} tooling.

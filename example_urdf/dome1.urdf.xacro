@@ -1,0 +1,326 @@
+<?xml version="1.0"?>
+<robot name="dome_x1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Parameters -->
+
+  <!-- Robot structure dimensions -->
+  <xacro:property name="plate_diameter" value="0.280" />
+  <xacro:property name="plate_thickness" value="0.003" />
+  <xacro:property name="bottom_plate_height" value="0.065" />
+  <xacro:property name="top_plate_height" value="0.125" />
+  <xacro:property name="base_link_x_offset" value="0.0" />
+
+  <!-- Base link visualization marker -->
+  <xacro:property name="base_link_marker_radius" value="0.01" />
+  <xacro:property name="base_link_marker_length" value="0.1" />
+
+  <!-- Wheel dimensions and positioning -->
+  <xacro:property name="wheel_base" value="0.215" />
+  <xacro:property name="wheel_diameter" value="0.0625" />
+  <xacro:property name="wheel_width" value="0.024" />
+  <xacro:property name="wheel_x_offset" value="0.08" />
+  <xacro:property name="wheel_ground_clearance" value="0.005" />
+
+  <!-- Support post dimensions and positions -->
+  <xacro:property name="support_post_diameter" value="0.010" />
+  <xacro:property name="support_post_height" value="0.070" />
+  <xacro:property name="support_post_1_x" value="0.1" />
+  <xacro:property name="support_post_1_y" value="0" />
+  <xacro:property name="support_post_2_x" value="-0.1" />
+  <xacro:property name="support_post_y_spread" value="0.070" />
+
+  <!-- Laser sensor dimensions and positioning -->
+  <xacro:property name="laser_x_offset" value="-0.040" />
+  <xacro:property name="laser_z_offset" value="0.130" />
+  <xacro:property name="laser_radius" value="0.03" />
+  <xacro:property name="laser_height" value="0.02" />
+
+  <!-- Laser tower dimensions and position -->
+  <xacro:property name="laser_tower_radius" value="0.005" />
+  <xacro:property name="laser_tower_height" value="0.05" />
+  <xacro:property name="laser_tower_x_offset" value="-0.05" />
+  <xacro:property name="laser_tower_y_offset" value="0" />
+  <xacro:property name="laser_tower_z_offset" value="0.03" />
+
+  <!-- IMU sensor dimensions and positioning -->
+  <xacro:property name="imu_x_offset" value="-0.040" />
+  <xacro:property name="imu_z_offset" value="0.020" />
+  <xacro:property name="imu_length" value="0.020" />
+  <xacro:property name="imu_width" value="0.020" />
+  <xacro:property name="imu_height" value="0.010" />
+
+  <!-- Front marker dimensions and positioning -->
+  <xacro:property name="front_marker_x_offset" value="0.15" />
+  <xacro:property name="front_marker_z_offset" value="0.065" />
+  <xacro:property name="front_marker_length" value="0.04" />
+  <xacro:property name="front_marker_width" value="0.02" />
+  <xacro:property name="front_marker_thickness" value="0.001" />
+
+  <!-- Materials -->
+  <material name="slate">
+  <color rgba="0.35 0.40 0.45 1.0"/>
+</material>
+
+<material name="red">
+  <color rgba="1 0 0 1"/>
+</material>
+
+<material name="orange">
+  <color rgba="1 0.5 0 1"/>
+</material>
+
+<material name="darkblue">
+  <color rgba="0 0 0.5 1"/>
+</material>
+
+<material name="coral">
+  <color rgba="0.91 0.45 0.38 1.0"/>
+</material>
+
+<material name="sage">
+  <color rgba="0.56 0.68 0.53 1.0"/>
+</material>
+
+<material name="gold">
+  <color rgba="0.85 0.68 0.32 1.0"/>
+</material>
+
+<material name="steel">
+  <color rgba="0.55 0.62 0.70 1.0"/>
+</material>
+
+<material name="plum">
+  <color rgba="0.56 0.35 0.48 0.3"/>
+</material>
+
+<material name="terracotta">
+  <color rgba="0.78 0.45 0.35 1.0"/>
+</material>
+
+<material name="seafoam">
+  <color rgba="0.42 0.70 0.65 1.0"/>
+</material>
+
+<material name="mustard">
+  <color rgba="0.75 0.60 0.22 1.0"/>
+</material>
+
+<material name="dusty_rose">
+  <color rgba="0.72 0.52 0.55 1.0"/>
+</material>
+
+<material name="charcoal">
+  <color rgba="0.25 0.27 0.30 1.0"/>
+</material>
+
+<material name="light_blue">
+  <color rgba="0.5 0.8 1.0 1.0"/>
+</material>
+
+  <!-- Base footprint (ground projection) -->
+  <link name="base_footprint">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${plate_diameter/2}" length="${plate_thickness}"/>
+      </geometry>
+      <material name="plum"/>
+    </visual>
+  </link>
+
+  <!-- Base link (center of the robot) -->
+  <link name="base_link">
+      <visual>
+        <geometry>
+          <sphere radius="${base_link_marker_radius}" length="${base_link_marker_length}"/>
+        </geometry>
+        <material name="gold"/>
+      </visual>
+  </link>
+
+  <joint name="base_link_to_base_footprint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="${-base_link_x_offset} 0 ${bottom_plate_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Bottom plate -->
+  <link name="bottom_plate">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${plate_diameter/2}" length="${plate_thickness}"/>
+      </geometry>
+      <material name="coral"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${plate_diameter/2}" length="${plate_thickness}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_link_to_bottom_plate" type="fixed">
+    <parent link="base_link"/>
+    <child link="bottom_plate"/>
+    <origin xyz="${-base_link_x_offset} 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Top plate -->
+  <link name="top_plate">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${plate_diameter/2}" length="${plate_thickness}"/>
+      </geometry>
+      <material name="charcoal"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${plate_diameter/2}" length="${plate_thickness}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_link_to_top_plate" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_plate"/>
+    <origin xyz="${-base_link_x_offset} 0 ${top_plate_height - bottom_plate_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Support post macro -->
+  <xacro:macro name="support_post" params="name x_pos y_pos">
+    <link name="${name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${support_post_diameter/2}" length="${support_post_height}"/>
+        </geometry>
+        <material name="mustard"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${support_post_diameter/2}" length="${support_post_diameter}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="base_link_to_${name}" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${x_pos} ${y_pos} ${(top_plate_height - bottom_plate_height)/2}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Support posts -->
+  <xacro:support_post name="support_post_1" x_pos="${support_post_1_x}" y_pos="${support_post_1_y}"/>
+  <xacro:support_post name="support_post_2" x_pos="${support_post_2_x}" y_pos="${support_post_y_spread}"/>
+  <xacro:support_post name="support_post_3" x_pos="${support_post_2_x}" y_pos="${-support_post_y_spread}"/>
+
+  <!-- Wheel macro -->
+  <xacro:macro name="wheel" params="side reflect">
+    <link name="${side}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="1.57 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_diameter/2}" length="${wheel_width}"/>
+        </geometry>
+        <material name="steel"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="1.57 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_diameter/2}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="base_link_to_${side}_wheel" type="continuous">
+      <parent link="base_link"/>
+      <child link="${side}_wheel"/>
+      <origin xyz="${wheel_x_offset} ${reflect * wheel_base/2} ${-wheel_diameter/2 - wheel_ground_clearance}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Wheels -->
+  <xacro:wheel side="left" reflect="1"/>
+  <xacro:wheel side="right" reflect="-1"/>
+
+  <!-- laser -->
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2.0}"/>
+      <geometry>
+          <cylinder radius="${laser_radius}" length="${laser_height}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+  </link>
+
+  <link name="laser_tower">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <cylinder radius="${laser_tower_radius}" length="${laser_tower_height}"/>
+      </geometry>
+      <material name="light_blue"/>
+    </visual>
+  </link>
+
+  <joint name="laser_to_tower" type="fixed">
+    <parent link="top_plate"/>
+    <child link="laser_tower"/>
+    <origin xyz="${laser_tower_x_offset} ${laser_tower_y_offset} ${laser_tower_z_offset}" rpy="0 0 0"/>
+  </joint>
+       
+  <joint name="base_link_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="${laser_x_offset} 0 ${laser_z_offset}" rpy="0 0 ${-pi/2.0}"/>
+  </joint>
+
+  <!-- IMU_link -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${imu_length} ${imu_width} ${imu_height}"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${imu_length} ${imu_width} ${imu_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_link_to_imu" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="${imu_x_offset} 0 ${imu_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Front marker -->
+  <link name="front_marker">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${front_marker_length} ${front_marker_width} ${front_marker_thickness}"/>
+      </geometry>
+      <material name="darkblue"/>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_front_marker" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_marker"/>
+    <origin xyz="${front_marker_x_offset} 0 ${front_marker_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+</robot>
