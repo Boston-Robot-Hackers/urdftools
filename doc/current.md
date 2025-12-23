@@ -1,7 +1,7 @@
 # URDF Tools - Current Project State
 
-**Last Updated**: 2025-12-21
-**Status**: Comparative analysis of three approaches to simplifying URDF creation
+**Last Updated**: 2025-12-22
+**Status**: Rewriting paper as comparative study of three approaches
 
 ---
 
@@ -135,23 +135,84 @@ urdftools/
 
 ---
 
-## Next Steps
+## Current Work: Paper Rewrite
 
-### For Paper/Publication
-1. ✅ Create simple example robot in all three approaches
-2. Finalize comparison metrics (lines, readability, learnability)
-3. Update paper sections to reflect three-approach comparison
-4. Add recommendation matrix to discussion section
+### What We're Doing
+Completely rewriting the paper in `tex/` to reflect a **comparative study** of all three approaches instead of focusing only on the DSL.
 
-### For Implementation
+**New Paper Title**: "Beyond URDF: A Comparative Study of Three Approaches to Concise Robot Description in ROS2"
+
+### Paper Outline Status
+See [paper.md](paper.md) for complete outline.
+
+**Completed Sections** (in paper.md):
+- ✅ Abstract - Succinct, concrete comparison of three approaches
+- ✅ Section 1.1: Motivation - Concrete problems with URDF/XML
+- ✅ Section 1.2: Requirements - Must be compatible, simpler, leverage ROS knowledge
+- ✅ Section 1.3: Our Contribution - Three approaches and key findings
+- ✅ Section 2: Background - Related work discussion
+- ✅ Section 3.1-3.4: URDF Challenges - Verbosity, hidden structure, repetition, Xacro limits
+
+**Style Guide**:
+- Be succinct
+- No long abstract statements that mean nothing
+- Concrete examples and numbers
+- Paragraph format, not bullets (except for lists)
+
+### Next Steps for Paper
+
+**Immediate** (Section 4 onward in paper.md):
+1. Finalize Section 4: Design Philosophy (applicable to all approaches)
+2. Write Section 5: Semantic YAML DSL approach (detailed)
+3. Write Section 6: Python Builder API approach (detailed)
+4. Write Section 7: Direct XML→YAML baseline (why it fails)
+5. Write Section 8: Comparative evaluation (head-to-head)
+6. Write Section 9: Discussion and recommendations
+7. Write Section 10: Conclusion
+
+**Then Convert to LaTeX**:
+1. Update `tex/abstract.tex` from paper.md abstract
+2. Update `tex/introduction.tex` from paper.md sections 1.x
+3. Update `tex/background.tex` from paper.md section 2
+4. Create new sections for comparative study
+5. Add code examples and tables
+6. Create comparison figures
+
+### What Changed from Original Plan
+
+**Old Paper**: Single-approach DSL paper
+- Focused only on YAML DSL
+- Presented DSL as "the solution"
+- 60% reduction as main result
+
+**New Paper**: Comparative study
+- Three approaches: DSL, Python API, Direct YAML
+- No single "best" - recommendations by user profile
+- Key finding: **semantic improvements matter more than format choice**
+- Direct YAML baseline proves format conversion alone fails
+
+### Key Message
+
+"Format is not the problem; semantics are the solution."
+
+Demonstrated by:
+- DSL succeeds (60% reduction) - semantic features
+- Python API succeeds (41% reduction) - semantic features
+- Direct YAML fails (-21% worse) - no semantic features
+
+---
+
+## Implementation Status
+
+### For Implementation (unchanged)
 1. **DSL**: Implement YAML→URDF compiler
 2. **Python API**: Implement `to_urdf()` XML generation
 3. **Both**: Create more example conversions
 4. **Both**: Add validation and error checking
 
-### For Documentation
+### For Documentation (mostly done)
 1. ✅ Consolidate documentation into `doc/`
-2. Create tutorial for each approach
+2. ✅ Create paper outline in `doc/paper.md`
 3. Document installation and usage
 4. Add contribution guidelines
 
@@ -159,11 +220,21 @@ urdftools/
 
 ## References
 
+- **Paper Outline**: See [paper.md](paper.md) - Complete outline with sections in progress
 - **Design Philosophy**: See [design_philosophy.md](design_philosophy.md)
 - **DSL Details**: See [dsl_approach.md](dsl_approach.md)
 - **Python API Details**: See [py_approach.md](py_approach.md)
+- **Direct YAML**: See [yaml_approach.md](yaml_approach.md)
 - **ROS Standards**: REP-105 (Coordinate Frames), REP-120 (Humanoids), REP-199 (Inertial)
 
 ---
 
-**Status**: Three approaches defined, simple example completed, ready for paper writing
+## How to Resume This Work
+
+1. **Continue paper.md**: Work through Section 4 onward following the style guide
+2. **Review examples**: Ensure code examples in `output/` match paper claims
+3. **Convert to LaTeX**: Once paper.md sections are complete, transfer to `tex/*.tex`
+4. **Add figures**: Create comparison tables and code snippets for LaTeX
+5. **References**: Add proper citations to `tex/references.tex`
+
+**Current Position**: Completed through Section 3.4 in paper.md outline
