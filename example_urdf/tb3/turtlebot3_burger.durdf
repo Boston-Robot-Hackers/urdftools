@@ -1,0 +1,56 @@
+robot: turtlebot3_burger
+
+hierarchy:
+  base_footprint:
+    base_link:
+      wheel_left:
+      wheel_right:
+      caster_back:
+      imu:
+      base_scan:
+
+joints:
+  base_link:
+    xyz: [0, 0, 0.010]
+
+  wheel_left:
+    type: continuous
+    xyz: [0, 0.08, 0.023]
+    rpy: [-1.57, 0, 0]
+    axis: [0, 0, 1]
+
+  wheel_right:
+    type: continuous
+    xyz: [0, -0.08, 0.023]
+    rpy: [-1.57, 0, 0]
+    axis: [0, 0, 1]
+
+  caster_back:
+    xyz: [-0.081, 0, -0.004]
+    rpy: [-1.57, 0, 0]
+
+  imu:
+    xyz: [-0.032, 0, 0.068]
+
+  base_scan:
+    xyz: [-0.032, 0, 0.172]
+
+links:
+  base_footprint: {}
+
+  base_link:
+    box: [0.140, 0.140, 0.143]
+
+  wheel_left:
+    cylinder: [0.033, 0.018]
+
+  wheel_right:
+    cylinder: [0.033, 0.018]
+
+  caster_back:
+    box: [0.030, 0.009, 0.020]
+
+  imu: {}
+
+  base_scan:
+    cylinder: [0.055, 0.0315]

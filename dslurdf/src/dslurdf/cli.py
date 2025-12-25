@@ -27,18 +27,31 @@ def main():
     data = loader.load(input_file)
 
     robot_name = data.get("robot", "unknown")
-    link_count = len(data.get("links", {}))
-    has_hierarchy = "hierarchy" in data
-
     print(f"  Robot: {robot_name}")
-    print(f"  Links: {link_count}")
-    print(f"  Hierarchy: {'yes' if has_hierarchy else 'no'}")
 
-    print("Generating URDF...")
+    print("\nGenerating URDF...")
     generator = UrdfGenerator()
     urdf_xml = generator.generate(data)
 
-    print(f"Writing {output_file}...")
+    # Report what was created
+    print(f"\n  Links created: {len(generator.links_created)}")
+    for link in generator.links_created:
+        print(f"    - {link}")
+
+    print(f"\n  Joints created: {len(generator.joints_created)}")
+    for joint in generator.joints_created:
+        print(f"    - {joint}")
+
+    # Report unused clauses
+    if generator.unused_top_level:
+        print(f"\nWarning: Unused top-level keys: {', '.join(generator.unused_top_level)}")
+
+    if generator.unused_per_link:
+        print("\nWarning: Unused link properties:")
+        for link_name, unused_keys in generator.unused_per_link.items():
+            print(f"  {link_name}: {', '.join(unused_keys)}")
+
+    print(f"\nWriting {output_file}...")
     output_file.write_text(urdf_xml)
 
     print("Done!")

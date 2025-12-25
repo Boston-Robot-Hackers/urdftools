@@ -1,0 +1,111 @@
+robot: floora
+
+hierarchy:
+  base_footprint:
+    base_link:
+      wheel_l:
+      wheel_r:
+      caster_fl_bearing:
+        caster_fl_wheel:
+      caster_bl_bearing:
+        caster_bl_wheel:
+      caster_br_bearing:
+        caster_br_wheel:
+      caster_fr_bearing:
+        caster_fr_wheel:
+
+joints:
+  base_link:
+    xyz: [0, 0, 0.089]
+
+  wheel_l:
+    type: continuous
+    xyz: [0, 0.1505, -0.052]
+    axis: [0, 1, 0]
+
+  wheel_r:
+    type: continuous
+    xyz: [0, -0.1505, -0.052]
+    axis: [0, 1, 0]
+
+  caster_fl_bearing:
+    type: continuous
+    xyz: [0.106, 0.106, -0.041]
+    axis: [0, 0, 1]
+
+  caster_bl_bearing:
+    type: continuous
+    xyz: [-0.106, 0.106, -0.041]
+    axis: [0, 0, 1]
+
+  caster_br_bearing:
+    type: continuous
+    xyz: [-0.106, -0.106, -0.041]
+    axis: [0, 0, 1]
+
+  caster_fr_bearing:
+    type: continuous
+    xyz: [0.106, -0.106, -0.041]
+    axis: [0, 0, 1]
+
+  caster_fl_wheel:
+    type: continuous
+    xyz: [-0.021, 0, -0.029]
+    axis: [0, 1, 0]
+
+  caster_bl_wheel:
+    type: continuous
+    xyz: [-0.021, 0, -0.029]
+    axis: [0, 1, 0]
+
+  caster_br_wheel:
+    type: continuous
+    xyz: [-0.021, 0, -0.029]
+    axis: [0, 1, 0]
+
+  caster_fr_wheel:
+    type: continuous
+    xyz: [-0.021, 0, -0.029]
+    axis: [0, 1, 0]
+
+links:
+  base_footprint: {}
+
+  base_link:
+    cylinder: [0.1495, 0.012]
+
+  wheel_l:
+    cylinder: [0.037, 0.020]
+    rpy: [1.57, 0, 0]
+
+  wheel_r:
+    cylinder: [0.037, 0.020]
+    rpy: [1.57, 0, 0]
+
+  caster_fl_bearing:
+    cylinder: [0.015, 0.010]
+
+  caster_bl_bearing:
+    cylinder: [0.015, 0.010]
+
+  caster_br_bearing:
+    cylinder: [0.015, 0.010]
+
+  caster_fr_bearing:
+    cylinder: [0.015, 0.010]
+
+  caster_fl_wheel:
+    cylinder: [0.019, 0.008625]
+    rpy: [1.57, 0, 0]
+
+  caster_bl_wheel:
+    cylinder: [0.019, 0.008625]
+    rpy: [1.57, 0, 0]
+
+  caster_br_wheel:
+    cylinder: [0.019, 0.008625]
+    rpy: [1.57, 0, 0]
+
+  caster_fr_wheel:
+    cylinder: [0.019, 0.008625]
+    rpy: [1.57, 0, 0]

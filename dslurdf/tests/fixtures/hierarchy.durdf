@@ -2,7 +2,7 @@ robot: hierarchy_bot
 
 hierarchy:
   base_link:
-    - top_link
+    top_link:
 
 links:
   base_link:
