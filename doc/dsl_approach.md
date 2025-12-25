@@ -193,18 +193,21 @@ limits: {lower: -1.57, upper: 1.57}
 ### Origins and Transforms
 
 ```yaml
+# Flat syntax - position and rotation as top-level fields
+top_link:
+  cylinder: [0.05, 0.2]
+  xyz: [0, 0, 0.1]
+  rpy: [1.57, 0, 0]
+
 # Position only
-origin: {xyz: [0.1, 0, 0.3]}
-origin: [0.1, 0, 0.3]  # Shorthand
+sensor_link:
+  box: [0.1, 0.1, 0.05]
+  xyz: [0.2, 0, 0.15]
 
-# Position and rotation
-origin: {xyz: [0.1, 0, 0.3], rpy: [0, 0, 1.57]}
-
-# Degrees notation (converted to radians)
-origin: {xyz: [0, 0, 0], rpy: [90deg, 0, 0]}
-
-# Joint origin (separate from visual origin)
-joint_origin: {xyz: [0, 0.12, -0.025]}
+# Rotation only
+rotated_link:
+  cylinder: [0.03, 0.1]
+  rpy: [0, 1.57, 0]
 ```
 
 ### Mirroring
