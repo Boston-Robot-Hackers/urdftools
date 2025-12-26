@@ -1,0 +1,134 @@
+robot: dome_x1
+
+materials:
+  plum: [0.56, 0.35, 0.48, 0.3]
+  gold: [0.85, 0.68, 0.32, 1.0]
+  coral: [0.91, 0.45, 0.38, 1.0]
+  charcoal: [0.25, 0.27, 0.30, 1.0]
+  light_blue: [0.5, 0.8, 1.0, 1.0]
+  mustard: [0.75, 0.60, 0.22, 1.0]
+  steel: [0.55, 0.62, 0.70, 1.0]
+  red: [1, 0, 0, 1]
+  orange: [1, 0.5, 0, 1]
+  darkblue: [0, 0, 0.5, 1]
+
+hierarchy:
+  base_footprint:
+    base_link:
+      bottom_plate:
+      top_plate:
+        laser_tower:
+      support_post_1:
+      support_post_2:
+      support_post_3:
+      left_wheel:
+      right_wheel:
+      laser:
+      imu_link:
+      front_marker:
+
+joints:
+  base_link:
+    xyz: [0.0, 0, 0.065]
+
+  bottom_plate:
+    xyz: [0.0, 0, 0]
+
+  top_plate:
+    xyz: [0.0, 0, 0.06]
+
+  laser_tower:
+    xyz: [-0.05, 0, 0.03]
+
+  support_post_1:
+    xyz: [0.1, 0, 0.03]
+
+  support_post_2:
+    xyz: [-0.1, 0.07, 0.03]
+
+  support_post_3:
+    xyz: [-0.1, -0.07, 0.03]
+
+  left_wheel:
+    type: continuous
+    xyz: [0.08, 0.1075, -0.03625]
+    axis: [0, 1, 0]
+
+  right_wheel:
+    type: continuous
+    xyz: [0.08, -0.1075, -0.03625]
+    axis: [0, 1, 0]
+
+  laser:
+    xyz: [-0.04, 0, 0.13]
+    rpy: [0, 0, -1.57]
+
+  imu_link:
+    xyz: [-0.04, 0, 0.02]
+
+  front_marker:
+    xyz: [0.15, 0, 0.065]
+
+links:
+  base_footprint:
+    cylinder: [0.14, 0.003]
+    material: plum
+
+  base_link:
+    sphere: [0.01]
+    material: gold
+
+  bottom_plate:
+    cylinder: [0.14, 0.003]
+    material: coral
+
+  top_plate:
+    cylinder: [0.14, 0.003]
+    material: charcoal
+
+  laser_tower:
+    cylinder: [0.05, 0.005]
+    material: light_blue
+
+  support_post_1:
+    cylinder: [0.07, 0.005]
+    material: mustard
+
+  support_post_2:
+    cylinder: [0.07, 0.005]
+    material: mustard
+
+  support_post_3:
+    cylinder: [0.07, 0.005]
+    material: mustard
+
+  left_wheel:
+    cylinder: [0.03125, 0.024]
+    rpy: [1.57, 0, 0]
+    material: steel
+
+  right_wheel:
+    cylinder: [0.03125, 0.024]
+    rpy: [1.57, 0, 0]
+    material: steel
+
+  laser:
+    cylinder: [0.02, 0.03]
+    rpy: [0, 0, 1.57]
+    material: red
+
+  imu_link:
+    box: [0.02, 0.02, 0.01]
+    material: orange
+
+  front_marker:
+    box: [0.04, 0.02, 0.001]
+    material: darkblue
+
+# Notes on DURDF features:
+# - Material/color support: ✅ Fully supported with RGBA values
+# - Xacro properties/variables: All expanded manually here
+# - Xacro macros: wheel and support_post macros expanded manually
+# - Mathematical expressions: All calculated manually (e.g., wheel_diameter/2)
+# - Explicit collision geometry: DURDF auto-generates, so not needed
+# - Nested parent-child relationships: ✅ Fully supported (e.g., laser_tower → top_plate)

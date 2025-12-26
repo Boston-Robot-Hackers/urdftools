@@ -12,6 +12,7 @@ class UrdfGenerator:
         self.unused_per_link: dict[str, list[str]] = {}
         self.joints_created: list[str] = []
         self.links_created: list[str] = []
+        self.materials_defined: set[str] = set()  # Track defined materials
 
     def generate(self, data: dict) -> str:
         # Track all keys
@@ -21,6 +22,11 @@ class UrdfGenerator:
         robot_name = data["robot"]
         used_keys.add("robot")
         robot = ET.Element("robot", name=robot_name)
+
+        # Add material definitions first
+        if "materials" in data:
+            used_keys.add("materials")
+            self._add_materials(robot, data["materials"])
 
         if "links" in data:
             used_keys.add("links")
@@ -67,7 +73,11 @@ class UrdfGenerator:
             if rpy is not None:
                 used_link_keys.add("rpy")
 
-            self._add_visual_geom(link, geom_type, dims, rpy)
+            material = data.get("material")
+            if material is not None:
+                used_link_keys.add("material")
+
+            self._add_visual_geom(link, geom_type, dims, rpy, material)
             self._add_collision_geom(link, geom_type, dims, rpy)
         except ValueError:
             # No geometry found - this is okay for reference frames
@@ -87,12 +97,16 @@ class UrdfGenerator:
             return "sphere", data["sphere"]
         raise ValueError("No geometry found in link data")
 
-    def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list):
+    def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list, material: str = None):
         visual = ET.SubElement(link, "visual")
         if rpy:
             self._add_origin(visual, rpy)
         geometry = ET.SubElement(visual, "geometry")
         self._add_geometry_elem(geometry, geom_type, dims)
+
+        # Add material reference if specified
+        if material:
+            ET.SubElement(visual, "material", name=material)
 
     def _add_collision_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list):
         collision = ET.SubElement(link, "collision")
@@ -170,6 +184,17 @@ class UrdfGenerator:
             ET.SubElement(joint, "axis", xyz=axis_str)
 
         self.joints_created.append(joint_name)
+
+    def _add_materials(self, robot: ET.Element, materials: dict):
+        """Add material definitions to the robot.
+
+        Materials can be specified as RGBA list: [r, g, b, a] where values are 0-1
+        """
+        for name, rgba in materials.items():
+            material = ET.SubElement(robot, "material", name=name)
+            rgba_str = " ".join(str(v) for v in rgba)
+            ET.SubElement(material, "color", rgba=rgba_str)
+            self.materials_defined.add(name)
 
     def _to_xml_string(self, root: ET.Element) -> str:
         ET.indent(root, space="  ")

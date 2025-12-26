@@ -22,9 +22,19 @@ def main():
         print(f"Error: Input file '{input_file}' not found")
         sys.exit(1)
 
+    if input_file.suffix != '.durdf':
+        print(f"Error: Expected a .durdf file, got '{input_file.name}'")
+        print("\nDURDF files are YAML-based robot descriptions.")
+        print("To convert URDF to DURDF, use the --reverse flag (not yet implemented).")
+        sys.exit(1)
+
     print(f"Loading {input_file}...")
     loader = DurdfLoader()
     data = loader.load(input_file)
+
+    if not isinstance(data, dict):
+        print(f"Error: Invalid DURDF format - expected YAML dictionary, got {type(data).__name__}")
+        sys.exit(1)
 
     robot_name = data.get("robot", "unknown")
     print(f"  Robot: {robot_name}")
