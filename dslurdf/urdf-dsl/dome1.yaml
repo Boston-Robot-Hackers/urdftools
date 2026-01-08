@@ -1,0 +1,185 @@
+robot: dome_x1
+
+# Hierarchy - defines the TF tree structure
+hierarchy:
+  base_footprint:
+    - base_link:
+        - bottom_plate
+        - top_plate:
+            - laser_tower
+        - support_post_1
+        - support_post_2
+        - support_post_3
+        - left_wheel
+        - right_wheel
+        - laser
+        - imu_link
+        - front_marker
+
+# Define reusable parameters
+params:
+  # Structural plates
+  plate_diameter: 0.280
+  plate_thickness: 0.003
+  bottom_plate_height: 0.065
+  top_plate_height: 0.125
+
+  # Base link visualization
+  base_link_marker_radius: 0.01
+  base_link_x_offset: 0.0
+
+  # Wheel dimensions and positioning
+  wheel_base: 0.215
+  wheel_diameter: 0.0625
+  wheel_width: 0.024
+  wheel_x_offset: 0.08
+  wheel_ground_clearance: 0.005
+
+  # Support post dimensions
+  support_post_diameter: 0.010
+  support_post_height: 0.070
+
+  # Laser sensor
+  laser_x_offset: -0.040
+  laser_z_offset: 0.130
+  laser_radius: 0.03
+  laser_height: 0.02
+
+  # Laser tower (mount)
+  laser_tower_radius: 0.005
+  laser_tower_height: 0.05
+  laser_tower_x_offset: -0.05
+  laser_tower_z_offset: 0.03
+
+  # IMU sensor
+  imu_x_offset: -0.040
+  imu_z_offset: 0.020
+  imu_size: [0.020, 0.020, 0.010]
+
+  # Front marker (orientation indicator)
+  front_marker_x_offset: 0.15
+  front_marker_z_offset: 0.065
+  front_marker_size: [0.04, 0.02, 0.001]
+
+# Templates - reusable component definitions
+templates:
+  support_post:
+    cylinder: [{support_post_diameter/2}, {support_post_height}]
+    material: mustard
+    collision:
+      cylinder: [{support_post_diameter/2}, {support_post_diameter}]
+
+  wheel:
+    cylinder: [{wheel_diameter/2}, {wheel_width}]
+    material: steel
+    joint_type: continuous
+    axis: y
+
+# Links - defines geometry, materials, and physics
+links:
+  # Ground projection (root frame)
+  base_footprint:
+    cylinder: [{plate_diameter/2}, {plate_thickness}]
+    material: plum
+
+  # Robot center reference frame (always at 0,0,0 relative to itself)
+  base_link:
+    origin: [{-base_link_x_offset}, 0, {bottom_plate_height}]
+    sphere: {base_link_marker_radius}
+    material: gold
+
+  # Lower structural plate
+  bottom_plate:
+    origin: [{-base_link_x_offset}, 0, 0]
+    cylinder: [{plate_diameter/2}, {plate_thickness}]
+    material: coral
+
+  # Upper structural plate
+  top_plate:
+    origin: [{-base_link_x_offset}, 0, {top_plate_height - bottom_plate_height}]
+    cylinder: [{plate_diameter/2}, {plate_thickness}]
+    material: charcoal
+
+  # Support posts (3 posts connecting bottom and top plates)
+  support_posts:
+    template: support_post
+    at:
+      support_post_1: [0.1, 0, {(top_plate_height - bottom_plate_height)/2}]
+      support_post_2: [-0.1, 0.070, {(top_plate_height - bottom_plate_height)/2}]
+      support_post_3: [-0.1, -0.070, {(top_plate_height - bottom_plate_height)/2}]
+
+  # Drive wheels (continuous joints, rotated 90 degrees)
+  wheels:
+    template: wheel
+    mirror_y: {xyz: [{wheel_x_offset}, {wheel_base/2}, {-wheel_diameter/2 - wheel_ground_clearance}], rot_x: 90deg}
+
+  # Lidar sensor
+  laser:
+    origin: [{laser_x_offset}, 0, {laser_z_offset}]
+    cylinder: [{laser_radius}, {laser_height}]
+    material: red
+
+  # Laser tower (mounting structure, child of top_plate)
+  laser_tower:
+    origin: [{laser_tower_x_offset}, 0, {laser_tower_z_offset}]
+    cylinder: [{laser_tower_radius}, {laser_tower_height}]
+    material: light_blue
+
+  # IMU sensor
+  imu_link:
+    origin: [{imu_x_offset}, 0, {imu_z_offset}]
+    box: {imu_size}
+    material: orange
+
+  # Front marker (orientation indicator)
+  front_marker:
+    origin: [{front_marker_x_offset}, 0, {front_marker_z_offset}]
+    box: {front_marker_size}
+    material: darkblue
+
+# ==============================================================================
+# NOTES ON DOME1 ROBOT
+# ==============================================================================
+#
+# This is a simple differential drive mobile robot with:
+# - Two-plate structure (bottom and top plates connected by support posts)
+# - Two drive wheels (continuous joints)
+# - Lidar sensor mounted on a tower
+# - IMU for orientation sensing
+# - Front marker for visual orientation reference
+#
+# COMPARISON TO ORIGINAL URDF XACRO:
+# Original: 326 lines in 1 file (with 14 material definitions, 2 macros)
+# DSL v1:   130 lines (60% reduction)
+# DSL v2:   113 lines (65% reduction with Tier 1+2 simplifications)
+#
+# KEY FEATURES:
+# 1. Flat syntax - geometry as top-level fields
+# 2. Separate hierarchy - TF tree structure visible at top
+# 3. Smart defaults - collision = visual, inertia auto-calculated
+# 4. Named materials - no RGBA definitions needed
+# 5. Variable substitution with arithmetic
+# 6. Templates - support_post and wheel templates eliminate repetition
+# 7. Compact instances - `at:` map syntax for multiple instances
+# 8. Mirror patterns - auto-generated left/right names
+# 9. Geometry shorthand - `cylinder: [r, l]`, `box: [x,y,z]`, `sphere: r`
+# 10. Axis shorthand - `axis: y` instead of `[0, 1, 0]`
+# 11. Origin shorthand - `origin: [x,y,z]` for xyz-only
+# 12. Rotation shortcuts - `rot_x: 90deg` instead of `rpy: [90deg, 0, 0]`
+#
+# HIERARCHY (TF tree):
+# base_footprint (ground)
+# └── base_link (robot center at 0,0,0)
+#     ├── bottom_plate
+#     ├── top_plate
+#     │   └── laser_tower
+#     ├── support_post_1
+#     ├── support_post_2
+#     ├── support_post_3
+#     ├── left_wheel (continuous)
+#     ├── right_wheel (continuous)
+#     ├── laser
+#     ├── imu_link
+#     └── front_marker
+#
+# ==============================================================================

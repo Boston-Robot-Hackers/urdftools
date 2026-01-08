@@ -1,0 +1,128 @@
+robot: linorobot2_2wd
+
+# Robot type declaration (follows ROS REP 105)
+type: mobile_platform
+  drive_type: differential
+  wheels: 2
+  casters: 2  # front and rear
+  sensors:
+    imu: 1
+    lidar: 1
+    camera: 0
+    depth_camera: 1
+    gps: 0
+
+# Physical parameters
+params:
+  # Base dimensions
+  base_length: 0.34
+  base_width: 0.34
+  base_height: 0.07
+  base_mass: 5.0
+
+  # Wheel parameters
+  wheel_radius: 0.05
+  wheel_width: 0.01
+  wheel_mass: 0.1
+  wheel_pos_x: 0.0
+  wheel_pos_y: 0.175
+  wheel_pos_z: 0.0
+  wheel_torque: 40
+
+  # Caster parameters
+  caster_mass: 0.01
+
+# Templates
+templates:
+  wheel:
+    parent: base_link
+    joint_type: continuous
+    axis: [0, 1, 0]
+    visual:
+      geometry:
+        cylinder: {radius: {wheel_radius}, length: {wheel_width}}
+      origin: {rpy: [90deg, 0, 0]}
+      material: blue
+    inertial:
+      mass: {wheel_mass}
+      # Cylinder inertia formula: I = (2/5) * m * r^2
+      inertia: auto  # automatically calculated from geometry and mass
+    # collision defaults to same as visual
+
+  caster:
+    parent: base_link
+    joint_type: fixed
+    visual:
+      geometry:
+        sphere: {radius: {wheel_radius}}
+      material: gray
+    inertial:
+      mass: {caster_mass}
+      inertia: auto
+
+# Links
+links:
+  # Base structure
+  base_link:
+    visual:
+      geometry:
+        box: {size: [{base_length}, {base_width}, {base_height}]}
+      material: gray
+    inertial:
+      mass: {base_mass}
+      inertia: auto
+
+  base_footprint:
+    parent: base_link
+    origin: {xyz: [0, 0, {-wheel_radius}]}
+    # No visual/collision for footprint
+
+  # Drive wheels using mirror pattern
+  wheels:
+    template: wheel
+    mirror_y:
+      origin: {xyz: [{wheel_pos_x}, {wheel_pos_y}, {wheel_pos_z}]}
+      names: [left_wheel_link, right_wheel_link]
+
+  # Caster wheels
+  front_caster:
+    template: caster
+    origin: {xyz: [{base_length/2}, 0, {-base_height/2}]}
+
+  rear_caster:
+    template: caster
+    origin: {xyz: [{-base_length/2}, 0, {-base_height/2}]}
+
+  # Sensors
+  imu_link:
+    parent: base_link
+    # origin defaults to [0, 0, 0] - IMU at robot center
+    visual:
+      geometry:
+        box: {size: [0.02, 0.02, 0.01]}
+      material: orange
+
+  laser:
+    parent: base_link
+    origin: {xyz: [0.055, 0.02, 0.41]}
+    visual:
+      geometry:
+        cylinder: {radius: 0.03, length: 0.04}
+      material: red
+
+  depth_camera_link:
+    parent: base_link
+    origin: {xyz: [0.14, 0.0, 0.12]}
+    visual:
+      geometry:
+        box: {size: [0.025, 0.09, 0.025]}
+      material: darkblue
+
+# Gazebo/simulation configuration
+gazebo:
+  diff_drive_controller:
+    wheel_separation: {wheel_pos_y * 2}
+    wheel_radius: {wheel_radius}
+    wheel_torque: {wheel_torque}
+    left_joint: left_wheel_joint
+    right_joint: right_wheel_joint
