@@ -1,8 +1,0 @@
-\section{Background and Related Work}
-The Unified Robot Description Format (URDF) \cite{urdf_ref} is the canonical XML-based specification for robot models in ROS2 \cite{ros2_ref}. URDF provides detailed descriptions of links, joints, inertial properties, and visual geometry, but its verbosity and nested structure make it difficult to maintain. Developers often face repetitive boilerplate, hidden TF tree hierarchies, and manual inertia calculations. The official ROS Wiki provides the XML specification and parser details \cite{roswiki_urdf}, while the ROS2 documentation offers tutorials on building robot models and using URDF with simulation tools \cite{ros2docs_urdf}.
-
-Xacro extends URDF \cite{urdf_ref} with macros and parameter substitution, partially reducing repetition. However, Xacro remains tied to XML syntax, and its macro expansions can be difficult to read and debug. As a result, Xacro is often described as cumbersome for both development and teaching \cite{industrial_training_urdf}.
-
-Several projects have attempted to address URDF’s limitations. SMURF augments URDF with YAML \cite{yaml_ref}, but XML remains primary. Community proposals for “URDF 2.0” have discussed improvements, but no implementation exists. Other YAML-based formats, such as AMBF and PyDSLRep, target specific frameworks or simulation environments rather than ROS2 compatibility \cite{ros2_ref}. None combine flat syntax, explicit hierarchy declarations, smart defaults, and a template system in a pure YAML replacement.
-
-This gap motivates our work: a YAML-based DSL \cite{yaml_ref,dsl_ref} that compiles directly to URDF \cite{urdf_ref}, designed to reduce verbosity, expose robot hierarchies, and improve readability while remaining fully compatible with ROS2 \cite{ros2_ref}.
