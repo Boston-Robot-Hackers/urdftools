@@ -1,0 +1,8 @@
+robot: octagon_test
+
+hierarchy:
+  base_link:
+
+links:
+  base_link:
+    octagon: [0.10, 0.005]

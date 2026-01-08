@@ -52,6 +52,32 @@ class Link:
             self.material_name = material
         return self
 
+    def octagon(self, radius, length, material=None):
+        """Add octagon geometry (8-sided prism), optionally with material
+
+        Args:
+            radius: Distance from center to vertex (circumradius)
+            length: Height/thickness of the prism along Z-axis
+            material: Optional material name
+        """
+        self.geometry = ("octagon", radius, length)
+        if material:
+            self.material_name = material
+        return self
+
+    def hexagon(self, radius, length, material=None):
+        """Add hexagon geometry (6-sided prism), optionally with material
+
+        Args:
+            radius: Distance from center to vertex (circumradius)
+            length: Height/thickness of the prism along Z-axis
+            material: Optional material name
+        """
+        self.geometry = ("hexagon", radius, length)
+        if material:
+            self.material_name = material
+        return self
+
     def mesh(self, filename, scale=None, material=None):
         """Add mesh geometry, optionally with scale and material"""
         self.geometry = ("mesh", filename, scale)

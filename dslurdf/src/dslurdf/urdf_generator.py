@@ -68,6 +68,10 @@ class UrdfGenerator:
                 used_link_keys.add("cylinder")
             elif "sphere" in data:
                 used_link_keys.add("sphere")
+            elif "octagon" in data:
+                used_link_keys.add("octagon")
+            elif "hexagon" in data:
+                used_link_keys.add("hexagon")
 
             rpy = data.get("rpy")
             if rpy is not None:
@@ -95,6 +99,10 @@ class UrdfGenerator:
             return "cylinder", data["cylinder"]
         if "sphere" in data:
             return "sphere", data["sphere"]
+        if "octagon" in data:
+            return "octagon", data["octagon"]
+        if "hexagon" in data:
+            return "hexagon", data["hexagon"]
         raise ValueError("No geometry found in link data")
 
     def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list, material: str = None):
@@ -127,6 +135,16 @@ class UrdfGenerator:
             ET.SubElement(geom, "cylinder", radius=str(dims[0]), length=str(dims[1]))
         elif geom_type == "sphere":
             ET.SubElement(geom, "sphere", radius=str(dims[0]))
+        elif geom_type == "octagon":
+            # Octagon: [radius, length] - approximated as cylinder
+            # In production, would generate octagonal mesh
+            geom.append(ET.Comment(" Octagon approximated as cylinder "))
+            ET.SubElement(geom, "cylinder", radius=str(dims[0]), length=str(dims[1]))
+        elif geom_type == "hexagon":
+            # Hexagon: [radius, length] - approximated as cylinder
+            # In production, would generate hexagonal mesh
+            geom.append(ET.Comment(" Hexagon approximated as cylinder "))
+            ET.SubElement(geom, "cylinder", radius=str(dims[0]), length=str(dims[1]))
 
     def _add_joints_from_hierarchy(self, robot: ET.Element, hierarchy: dict, joints: dict):
         # Track which children are referenced in hierarchy

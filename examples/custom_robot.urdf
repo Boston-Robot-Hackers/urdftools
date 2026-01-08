@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<robot name="custom_robot">
+  <material name="clear">
+    <color rgba="0.9 0.9 0.9 0.3" />
+  </material>
+  <material name="blue">
+    <color rgba="0 0 1 1" />
+  </material>
+  <material name="light_blue">
+    <color rgba="0.5 0.8 1.0 1" />
+  </material>
+  <material name="grey">
+    <color rgba="0.5 0.5 0.5 1" />
+  </material>
+  <material name="red">
+    <color rgba="1 0 0 1" />
+  </material>
+  <material name="black">
+    <color rgba="0 0 0 1" />
+  </material>
+  <material name="gold">
+    <color rgba="0.85 0.65 0.1 1" />
+  </material>
+  <link name="base_footprint">
+    <visual>
+      <geometry>
+        <sphere radius="0.005" />
+      </geometry>
+      <material name="gold" />
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.005" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="gold" />
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="bottom_plate">
+    <visual>
+      <geometry>
+        <cylinder radius="0.14" length="0.003" />
+      </geometry>
+      <material name="clear" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.14" length="0.003" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="top_plate">
+    <visual>
+      <geometry>
+        <cylinder radius="0.14" length="0.003" />
+      </geometry>
+      <material name="clear" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.14" length="0.003" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="support_post_1">
+    <visual>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+      <material name="blue" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="support_post_2">
+    <visual>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+      <material name="blue" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="support_post_3">
+    <visual>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+      <material name="blue" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.007" length="0.08" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.03125" length="0.024" />
+      </geometry>
+      <material name="black" />
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.03125" length="0.024" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.03125" length="0.024" />
+      </geometry>
+      <material name="black" />
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.03125" length="0.024" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lidar">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.03" />
+      </geometry>
+      <material name="light_blue" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.03" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.01" />
+      </geometry>
+      <material name="grey" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_marker">
+    <visual>
+      <geometry>
+        <box size="0.04 0.02 0.001" />
+      </geometry>
+      <material name="red" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.04 0.02 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0.085 0 0.065" />
+  </joint>
+  <joint name="base_link_to_left_wheel" type="continuous">
+    <parent link="base_link" />
+    <child link="left_wheel" />
+    <origin xyz="0 0.1075 -0.04" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_right_wheel" type="continuous">
+    <parent link="base_link" />
+    <child link="right_wheel" />
+    <origin xyz="0 -0.1075 -0.04" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_lidar" type="fixed">
+    <parent link="base_link" />
+    <child link="lidar" />
+    <origin xyz="-0.04 0 0.13" />
+  </joint>
+  <joint name="base_link_to_imu_link" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="-0.04 0 0.02" />
+  </joint>
+  <joint name="base_link_to_front_marker" type="fixed">
+    <parent link="base_link" />
+    <child link="front_marker" />
+    <origin xyz="0.015 0 0.05" />
+  </joint>
+  <joint name="base_link_to_support_post_1" type="fixed">
+    <parent link="base_link" />
+    <child link="support_post_1" />
+    <origin xyz="0.04 0 0.03" />
+  </joint>
+  <joint name="base_link_to_support_post_2" type="fixed">
+    <parent link="base_link" />
+    <child link="support_post_2" />
+    <origin xyz="-0.14 0.07 0.03" />
+  </joint>
+  <joint name="base_link_to_support_post_3" type="fixed">
+    <parent link="base_link" />
+    <child link="support_post_3" />
+    <origin xyz="-0.14 -0.07 0.03" />
+  </joint>
+  <joint name="base_footprint_to_bottom_plate" type="fixed">
+    <parent link="base_footprint" />
+    <child link="bottom_plate" />
+    <origin xyz="0 0 0.065" />
+  </joint>
+  <joint name="bottom_plate_to_top_plate" type="fixed">
+    <parent link="bottom_plate" />
+    <child link="top_plate" />
+    <origin xyz="0 0 0.06" />
+  </joint>
+</robot>

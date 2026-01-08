@@ -1,0 +1,131 @@
+robot: custom_robot
+
+materials:
+  clear: [0.9, 0.9, 0.9, 0.3]      # Clear acrylic (semi-transparent)
+  blue: [0, 0, 1, 1]                # Blue for support posts
+  light_blue: [0.5, 0.8, 1.0, 1]    # Light blue for lidar
+  grey: [0.5, 0.5, 0.5, 1]          # Grey for IMU
+  red: [1, 0, 0, 1]                 # Red for front marker
+  black: [0, 0, 0, 1]               # Black for wheels
+  gold: [0.85, 0.65, 0.1, 1]        # Gold for base markers
+
+hierarchy:
+  base_footprint:
+    base_link:
+      left_wheel:
+      right_wheel:
+      lidar:
+      imu_link:
+      front_marker:
+      support_post_1:
+      support_post_2:
+      support_post_3:
+    bottom_plate:
+      top_plate:
+
+joints:
+  # base_link: between wheels on bottom plate
+  base_link:
+    xyz: [0.085, 0, 0.065]
+
+  # Bottom plate: 65mm above base_footprint
+  bottom_plate:
+    xyz: [0, 0, 0.065]
+
+  # Top plate: 60mm above bottom plate (total 125mm from base_footprint)
+  top_plate:
+    xyz: [0, 0, 0.060]
+
+  # Wheels: continuous joints, wheel_base = 215mm (±107.5mm)
+  left_wheel:
+    type: continuous
+    xyz: [0, 0.1075, -0.040]
+    axis: [0, 1, 0]
+
+  right_wheel:
+    type: continuous
+    xyz: [0, -0.1075, -0.040]
+    axis: [0, 1, 0]
+
+  # Lidar: -40mm X, 130mm Z from base_link
+  lidar:
+    xyz: [-0.040, 0, 0.130]
+
+  # IMU: -40mm X, 20mm Z from base_link
+  imu_link:
+    xyz: [-0.040, 0, 0.020]
+
+  # Front marker: +15mm X, 50mm Z from base_link
+  front_marker:
+    xyz: [0.015, 0, 0.050]
+
+  # Support posts: XY from spec, Z=30mm to center posts between plates
+  # Posts span from -10mm below bottom to +10mm above top (80mm total height)
+  support_post_1:
+    xyz: [0.040, 0, 0.030]
+
+  support_post_2:
+    xyz: [-0.140, 0.070, 0.030]
+
+  support_post_3:
+    xyz: [-0.140, -0.070, 0.030]
+
+links:
+  # base_footprint: visible 1cm sphere
+  base_footprint:
+    sphere: [0.005]
+    material: gold
+
+  # base_link: visible marker
+  base_link:
+    sphere: [0.010]
+    material: gold
+
+  # Bottom plate: 280mm diameter, 3mm thick acrylic
+  bottom_plate:
+    cylinder: [0.140, 0.003]
+    material: clear
+
+  # Top plate: 280mm diameter, 3mm thick acrylic
+  top_plate:
+    cylinder: [0.140, 0.003]
+    material: clear
+
+  # Support posts: 14mm diameter, 80mm height (from -10mm to +10mm beyond plates)
+  support_post_1:
+    cylinder: [0.007, 0.080]
+    material: blue
+
+  support_post_2:
+    cylinder: [0.007, 0.080]
+    material: blue
+
+  support_post_3:
+    cylinder: [0.007, 0.080]
+    material: blue
+
+  # Wheels: diameter 62.5mm (radius 31.25mm), width 24mm
+  left_wheel:
+    cylinder: [0.03125, 0.024]
+    rpy: [1.57, 0, 0]
+    material: black
+
+  right_wheel:
+    cylinder: [0.03125, 0.024]
+    rpy: [1.57, 0, 0]
+    material: black
+
+  # Lidar: 40mm diameter, 30mm height
+  lidar:
+    cylinder: [0.020, 0.030]
+    material: light_blue
+
+  # IMU: 20x20x10mm box
+  imu_link:
+    box: [0.020, 0.020, 0.010]
+    material: grey
+
+  # Front marker: 40x20x1mm thin marker
+  front_marker:
+    box: [0.040, 0.020, 0.001]
+    material: red
