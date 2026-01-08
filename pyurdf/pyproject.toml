@@ -1,0 +1,14 @@
+[project]
+name = "pyurdf"
+version = "0.1.0"
+description = "Python Builder API for URDF robot descriptions"
+readme = "README.md"
+authors = [
+    { name = "Pito Salas", email = "pitosalas@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
