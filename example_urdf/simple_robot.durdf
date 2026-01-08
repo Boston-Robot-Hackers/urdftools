@@ -1,0 +1,49 @@
+robot: simple_diffbot
+
+hierarchy:
+  base_footprint:
+    base_link:
+      left_wheel:
+      right_wheel:
+      caster:
+      lidar:
+
+joints:
+  base_link:
+    xyz: [0, 0, 0.05]
+
+  left_wheel:
+    type: continuous
+    xyz: [0, 0.12, -0.025]
+    axis: [0, 1, 0]
+
+  right_wheel:
+    type: continuous
+    xyz: [0, -0.12, -0.025]
+    axis: [0, 1, 0]
+
+  caster:
+    xyz: [-0.12, 0, -0.05]
+
+  lidar:
+    xyz: [0, 0, 0.045]
+
+links:
+  base_footprint: {}
+
+  base_link:
+    cylinder: [0.15, 0.05]
+
+  left_wheel:
+    cylinder: [0.05, 0.03]
+    rpy: [1.57, 0, 0]
+
+  right_wheel:
+    cylinder: [0.05, 0.03]
+    rpy: [1.57, 0, 0]
+
+  caster:
+    sphere: [0.025]
+
+  lidar:
+    cylinder: [0.03, 0.04]

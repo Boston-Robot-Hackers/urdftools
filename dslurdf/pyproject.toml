@@ -1,0 +1,20 @@
+[project]
+name = "dslurdf"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Pito Salas", email = "pitosalas@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pytest>=9.0.2",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+durdf = "dslurdf.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

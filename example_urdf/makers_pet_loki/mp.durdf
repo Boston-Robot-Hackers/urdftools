@@ -1,0 +1,85 @@
+robot: makerspet_loki
+
+hierarchy:
+  base_footprint:
+    base_link:
+      caster_link:
+      wheel_left:
+      wheel_right:
+      base_scan:
+      base_upper:
+        head:
+          tablet:
+            color_camera:
+            imu:
+
+joints:
+  base_link:
+    xyz: [0, 0, 0.018]
+
+  caster_link:
+    xyz: [0.0656, 0, 0.002]
+
+  wheel_left:
+    type: continuous
+    xyz: [0, 0.0795, 0.0155]
+    rpy: [-1.57, 0, 0]
+    axis: [0, 1, 0]
+
+  wheel_right:
+    type: continuous
+    xyz: [0, -0.0795, 0.0155]
+    rpy: [-1.57, 0, 0]
+    axis: [0, 1, 0]
+
+  base_scan:
+    xyz: [0, 0, 0.1316]
+
+  base_upper:
+    xyz: [0, 0, 0.1422]
+
+  head:
+    xyz: [0, 0, 0.003]
+
+  tablet:
+    xyz: [0.0321, 0, 0]
+    rpy: [0, -0.349, 0]
+
+  color_camera:
+    xyz: [0.0045, -0.0795, 0.039]
+
+  imu:
+    xyz: [0, 0, 0.039]
+
+links:
+  base_footprint: {}
+
+  base_link:
+    cylinder: [0.1021, 0.1227]
+
+  caster_link:
+    sphere: [0.02]
+
+  wheel_left:
+    cylinder: [0.0335, 0.029]
+
+  wheel_right:
+    cylinder: [0.0335, 0.029]
+
+  base_scan:
+    cylinder: [0.0328, 0.018]
+
+  base_upper:
+    cylinder: [0.1021, 0.003]
+
+  head:
+    cylinder: [0.0328, 0.09]
+
+  tablet:
+    box: [0.009, 0.1669, 0.0781]
+
+  color_camera:
+    sphere: [0.002]
+
+  imu:
+    box: [0.001, 0.002, 0.004]

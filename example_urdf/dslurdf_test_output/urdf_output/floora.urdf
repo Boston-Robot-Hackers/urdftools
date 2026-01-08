@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<robot name="floora">
+  <link name="base_footprint" />
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.1495" length="0.012" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1495" length="0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel_l">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.037" length="0.02" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.037" length="0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel_r">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.037" length="0.02" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.037" length="0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_fl_bearing">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_bl_bearing">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_br_bearing">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_fr_bearing">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_fl_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_bl_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_br_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_fr_wheel">
+    <visual>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.008625" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0.089" />
+  </joint>
+  <joint name="base_link_to_wheel_l" type="continuous">
+    <parent link="base_link" />
+    <child link="wheel_l" />
+    <origin xyz="0 0.1505 -0.052" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_wheel_r" type="continuous">
+    <parent link="base_link" />
+    <child link="wheel_r" />
+    <origin xyz="0 -0.1505 -0.052" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_caster_fl_bearing" type="continuous">
+    <parent link="base_link" />
+    <child link="caster_fl_bearing" />
+    <origin xyz="0.106 0.106 -0.041" />
+    <axis xyz="0 0 1" />
+  </joint>
+  <joint name="caster_fl_bearing_to_caster_fl_wheel" type="continuous">
+    <parent link="caster_fl_bearing" />
+    <child link="caster_fl_wheel" />
+    <origin xyz="-0.021 0 -0.029" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_caster_bl_bearing" type="continuous">
+    <parent link="base_link" />
+    <child link="caster_bl_bearing" />
+    <origin xyz="-0.106 0.106 -0.041" />
+    <axis xyz="0 0 1" />
+  </joint>
+  <joint name="caster_bl_bearing_to_caster_bl_wheel" type="continuous">
+    <parent link="caster_bl_bearing" />
+    <child link="caster_bl_wheel" />
+    <origin xyz="-0.021 0 -0.029" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_caster_br_bearing" type="continuous">
+    <parent link="base_link" />
+    <child link="caster_br_bearing" />
+    <origin xyz="-0.106 -0.106 -0.041" />
+    <axis xyz="0 0 1" />
+  </joint>
+  <joint name="caster_br_bearing_to_caster_br_wheel" type="continuous">
+    <parent link="caster_br_bearing" />
+    <child link="caster_br_wheel" />
+    <origin xyz="-0.021 0 -0.029" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_caster_fr_bearing" type="continuous">
+    <parent link="base_link" />
+    <child link="caster_fr_bearing" />
+    <origin xyz="0.106 -0.106 -0.041" />
+    <axis xyz="0 0 1" />
+  </joint>
+  <joint name="caster_fr_bearing_to_caster_fr_wheel" type="continuous">
+    <parent link="caster_fr_bearing" />
+    <child link="caster_fr_wheel" />
+    <origin xyz="-0.021 0 -0.029" />
+    <axis xyz="0 1 0" />
+  </joint>
+</robot>

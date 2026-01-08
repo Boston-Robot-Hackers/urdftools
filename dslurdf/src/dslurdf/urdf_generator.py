@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+# urdf_generator.py - Generates URDF XML from DURDF data
+# Author: Pito Salas and Claude Code
+# Open Source Under MIT license
+
+import xml.etree.ElementTree as ET
+
+
+class UrdfGenerator:
+    def __init__(self):
+        self.unused_top_level: list[str] = []
+        self.unused_per_link: dict[str, list[str]] = {}
+        self.joints_created: list[str] = []
+        self.links_created: list[str] = []
+        self.materials_defined: set[str] = set()  # Track defined materials
+
+    def generate(self, data: dict) -> str:
+        # Track all keys
+        all_keys = set(data.keys())
+        used_keys = set()
+
+        robot_name = data["robot"]
+        used_keys.add("robot")
+        robot = ET.Element("robot", name=robot_name)
+
+        # Add material definitions first
+        if "materials" in data:
+            used_keys.add("materials")
+            self._add_materials(robot, data["materials"])
+
+        if "links" in data:
+            used_keys.add("links")
+            for link_name, link_data in data["links"].items():
+                self._add_link(robot, link_name, link_data)
+                self.links_created.append(link_name)
+
+        joints = data.get("joints", {})
+        if joints:
+            used_keys.add("joints")
+
+        if "hierarchy" in data:
+            used_keys.add("hierarchy")
+            self._add_joints_from_hierarchy(robot, data["hierarchy"], joints)
+
+        # Record unused top-level keys
+        self.unused_top_level = sorted(all_keys - used_keys)
+
+        return self._to_xml_string(robot)
+
+    def _add_link(self, robot: ET.Element, name: str, data: dict):
+        link = ET.SubElement(robot, "link", name=name)
+
+        # Track used keys for this link
+        all_link_keys = set(data.keys())
+        used_link_keys = set()
+
+        # Handle empty links (no geometry)
+        if not data:
+            return
+
+        # Try to get geometry (may be None for empty links)
+        try:
+            geom_type, dims = self._get_geometry(data)
+            # Track geometry key used
+            if "box" in data:
+                used_link_keys.add("box")
+            elif "cylinder" in data:
+                used_link_keys.add("cylinder")
+            elif "sphere" in data:
+                used_link_keys.add("sphere")
+
+            rpy = data.get("rpy")
+            if rpy is not None:
+                used_link_keys.add("rpy")
+
+            material = data.get("material")
+            if material is not None:
+                used_link_keys.add("material")
+
+            self._add_visual_geom(link, geom_type, dims, rpy, material)
+            self._add_collision_geom(link, geom_type, dims, rpy)
+        except ValueError:
+            # No geometry found - this is okay for reference frames
+            pass
+
+        # Record unused link keys
+        unused = sorted(all_link_keys - used_link_keys)
+        if unused:
+            self.unused_per_link[name] = unused
+
+    def _get_geometry(self, data: dict) -> tuple[str, list]:
+        if "box" in data:
+            return "box", data["box"]
+        if "cylinder" in data:
+            return "cylinder", data["cylinder"]
+        if "sphere" in data:
+            return "sphere", data["sphere"]
+        raise ValueError("No geometry found in link data")
+
+    def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list, material: str = None):
+        visual = ET.SubElement(link, "visual")
+        if rpy:
+            self._add_origin(visual, rpy)
+        geometry = ET.SubElement(visual, "geometry")
+        self._add_geometry_elem(geometry, geom_type, dims)
+
+        # Add material reference if specified
+        if material:
+            ET.SubElement(visual, "material", name=material)
+
+    def _add_collision_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list):
+        collision = ET.SubElement(link, "collision")
+        if rpy:
+            self._add_origin(collision, rpy)
+        geometry = ET.SubElement(collision, "geometry")
+        self._add_geometry_elem(geometry, geom_type, dims)
+
+    def _add_origin(self, parent: ET.Element, rpy: list):
+        rpy_str = " ".join(str(v) for v in rpy)
+        ET.SubElement(parent, "origin", rpy=rpy_str)
+
+    def _add_geometry_elem(self, geom: ET.Element, geom_type: str, dims: list):
+        if geom_type == "box":
+            size_str = " ".join(str(d) for d in dims)
+            ET.SubElement(geom, "box", size=size_str)
+        elif geom_type == "cylinder":
+            ET.SubElement(geom, "cylinder", radius=str(dims[0]), length=str(dims[1]))
+        elif geom_type == "sphere":
+            ET.SubElement(geom, "sphere", radius=str(dims[0]))
+
+    def _add_joints_from_hierarchy(self, robot: ET.Element, hierarchy: dict, joints: dict):
+        # Track which children are referenced in hierarchy
+        children_in_hierarchy = set()
+
+        def process_hierarchy(parent_name, children):
+            if isinstance(children, list):
+                # List of leaf children
+                for child_name in children:
+                    children_in_hierarchy.add(child_name)
+                    props = joints.get(child_name, {})
+                    self._add_joint(robot, parent_name, child_name, props)
+            elif isinstance(children, dict):
+                # Dict of children with their own descendants
+                for child_name, grandchildren in children.items():
+                    children_in_hierarchy.add(child_name)
+                    props = joints.get(child_name, {})
+                    self._add_joint(robot, parent_name, child_name, props)
+                    # Recursively process descendants
+                    if grandchildren:
+                        process_hierarchy(child_name, grandchildren)
+
+        for parent_name, children in hierarchy.items():
+            process_hierarchy(parent_name, children)
+
+        # Check for joints that don't match any child in hierarchy
+        unused_joints = set(joints.keys()) - children_in_hierarchy
+        if unused_joints:
+            for joint_name in sorted(unused_joints):
+                print(f"Warning: joints section for '{joint_name}' has no matching child in hierarchy")
+
+    def _add_joint(self, robot: ET.Element, parent: str, child: str, properties: dict):
+        joint_name = f"{parent}_to_{child}"
+        joint_type = properties.get("type", "fixed")
+
+        joint = ET.SubElement(robot, "joint", name=joint_name, type=joint_type)
+        ET.SubElement(joint, "parent", link=parent)
+        ET.SubElement(joint, "child", link=child)
+
+        # Add origin if xyz or rpy specified
+        xyz = properties.get("xyz")
+        rpy = properties.get("rpy")
+        if xyz or rpy:
+            origin_attrs = {}
+            if xyz:
+                origin_attrs["xyz"] = " ".join(str(v) for v in xyz)
+            if rpy:
+                origin_attrs["rpy"] = " ".join(str(v) for v in rpy)
+            ET.SubElement(joint, "origin", **origin_attrs)
+
+        # Add axis if specified (for continuous/revolute joints)
+        axis = properties.get("axis")
+        if axis:
+            axis_str = " ".join(str(v) for v in axis)
+            ET.SubElement(joint, "axis", xyz=axis_str)
+
+        self.joints_created.append(joint_name)
+
+    def _add_materials(self, robot: ET.Element, materials: dict):
+        """Add material definitions to the robot.
+
+        Materials can be specified as RGBA list: [r, g, b, a] where values are 0-1
+        """
+        for name, rgba in materials.items():
+            material = ET.SubElement(robot, "material", name=name)
+            rgba_str = " ".join(str(v) for v in rgba)
+            ET.SubElement(material, "color", rgba=rgba_str)
+            self.materials_defined.add(name)
+
+    def _to_xml_string(self, root: ET.Element) -> str:
+        ET.indent(root, space="  ")
+        xml_str = ET.tostring(root, encoding="unicode")
+        return f'<?xml version="1.0"?>\n{xml_str}\n'

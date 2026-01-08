@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<robot name="makerspet_loki">
+  <link name="base_footprint" />
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.1021" length="0.1227" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1021" length="0.1227" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="caster_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel_left">
+    <visual>
+      <geometry>
+        <cylinder radius="0.0335" length="0.029" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.0335" length="0.029" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel_right">
+    <visual>
+      <geometry>
+        <cylinder radius="0.0335" length="0.029" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.0335" length="0.029" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="base_scan">
+    <visual>
+      <geometry>
+        <cylinder radius="0.0328" length="0.018" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.0328" length="0.018" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="base_upper">
+    <visual>
+      <geometry>
+        <cylinder radius="0.1021" length="0.003" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.1021" length="0.003" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="head">
+    <visual>
+      <geometry>
+        <cylinder radius="0.0328" length="0.09" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.0328" length="0.09" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="tablet">
+    <visual>
+      <geometry>
+        <box size="0.009 0.1669 0.0781" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.009 0.1669 0.0781" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="color_camera">
+    <visual>
+      <geometry>
+        <sphere radius="0.002" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.002" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="imu">
+    <visual>
+      <geometry>
+        <box size="0.001 0.002 0.004" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.001 0.002 0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0.018" />
+  </joint>
+  <joint name="base_link_to_caster_link" type="fixed">
+    <parent link="base_link" />
+    <child link="caster_link" />
+    <origin xyz="0.0656 0 0.002" />
+  </joint>
+  <joint name="base_link_to_wheel_left" type="continuous">
+    <parent link="base_link" />
+    <child link="wheel_left" />
+    <origin xyz="0 0.0795 0.0155" rpy="-1.57 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_wheel_right" type="continuous">
+    <parent link="base_link" />
+    <child link="wheel_right" />
+    <origin xyz="0 -0.0795 0.0155" rpy="-1.57 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <joint name="base_link_to_base_scan" type="fixed">
+    <parent link="base_link" />
+    <child link="base_scan" />
+    <origin xyz="0 0 0.1316" />
+  </joint>
+  <joint name="base_link_to_base_upper" type="fixed">
+    <parent link="base_link" />
+    <child link="base_upper" />
+    <origin xyz="0 0 0.1422" />
+  </joint>
+  <joint name="base_upper_to_head" type="fixed">
+    <parent link="base_upper" />
+    <child link="head" />
+    <origin xyz="0 0 0.003" />
+  </joint>
+  <joint name="head_to_tablet" type="fixed">
+    <parent link="head" />
+    <child link="tablet" />
+    <origin xyz="0.0321 0 0" rpy="0 -0.349 0" />
+  </joint>
+  <joint name="tablet_to_color_camera" type="fixed">
+    <parent link="tablet" />
+    <child link="color_camera" />
+    <origin xyz="0.0045 -0.0795 0.039" />
+  </joint>
+  <joint name="tablet_to_imu" type="fixed">
+    <parent link="tablet" />
+    <child link="imu" />
+    <origin xyz="0 0 0.039" />
+  </joint>
+</robot>
