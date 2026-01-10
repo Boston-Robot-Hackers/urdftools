@@ -1,0 +1,8 @@
+robot: simple_mesh
+
+hierarchy:
+  base_link:
+
+links:
+  base_link:
+    mesh: "file:///Users/pitosalas/mydev/urdftools/dslurdf/examples/cube.obj"

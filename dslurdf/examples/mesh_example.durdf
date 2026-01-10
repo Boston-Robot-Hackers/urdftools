@@ -1,0 +1,45 @@
+robot: mesh_demo
+
+materials:
+  blue: [0, 0, 0.8, 1]
+  gray: [0.5, 0.5, 0.5, 1]
+
+hierarchy:
+  base_footprint:
+    base_link:
+      - sensor_link
+      - arm_link
+
+joints:
+  base_link:
+    xyz: [0, 0, 0.05]
+
+  sensor_link:
+    type: fixed
+    xyz: [0.2, 0, 0.1]
+
+  arm_link:
+    type: revolute
+    xyz: [0, 0, 0.15]
+    axis: [0, 0, 1]
+
+links:
+  base_footprint: {}
+
+  base_link:
+    # Simple mesh format - absolute path so visualizers can find it
+    # Color/materials come from the mesh file itself
+    mesh: "file:///Users/pitosalas/mydev/urdftools/dslurdf/examples/cube.obj"
+
+  sensor_link:
+    # Dictionary format with scale parameter
+    # Color/materials come from the mesh file itself
+    mesh:
+      filename: "file:///Users/pitosalas/mydev/urdftools/dslurdf/examples/cube.obj"
+      scale: [0.5, 0.5, 0.5]
+    rpy: [0, 0, 45deg]
+
+  arm_link:
+    # Can also mix meshes with primitive geometries in the same robot
+    cylinder: [0.02, 0.3]
+    material: gray

@@ -10,6 +10,56 @@ from dslurdf.durdf_loader import DurdfLoader
 from dslurdf.urdf_generator import UrdfGenerator
 
 
+def _display_validation_report(report: dict):
+    """Display TF validation and lint report."""
+    if not report:
+        return
+
+    print("\n" + "=" * 60)
+    print("TF VALIDATION & LINT REPORT")
+    print("=" * 60)
+
+    # Standard frames
+    if report["standard_frames"]:
+        print("\n✓ Standard Frames:")
+        for frame in report["standard_frames"]:
+            desc = frame.get("description", "")
+            if desc:
+                print(f"  • {frame['name']}: {desc}")
+            else:
+                print(f"  • {frame['name']}")
+
+    # Sensor frames
+    if report["sensor_frames"]:
+        print("\n⚙ Sensor Frames:")
+        for frame in report["sensor_frames"]:
+            if frame["standard"]:
+                print(f"  ✓ {frame['name']}")
+            else:
+                print(f"  ⚠ {frame['name']} (suggest: {frame['suggestion']})")
+
+    # Non-standard frames
+    if report["non_standard_frames"]:
+        print("\n⚠ Non-Standard Frame Names:")
+        for name in report["non_standard_frames"]:
+            print(f"  • {name}")
+        print("  Note: Consider using standard suffixes like '_link' for consistency")
+
+    # Lint warnings
+    if report["lint_warnings"]:
+        print("\n⚠ Lint Warnings:")
+        for warning in report["lint_warnings"]:
+            print(f"  • {warning}")
+
+    # Lint info
+    if report["lint_info"]:
+        print("\nℹ Info:")
+        for info in report["lint_info"]:
+            print(f"  • {info}")
+
+    print("=" * 60)
+
+
 def main():
     if len(sys.argv) != 3:
         print("Usage: durdf <input.durdf> <output.urdf>")
@@ -60,6 +110,9 @@ def main():
         print("\nWarning: Unused link properties:")
         for link_name, unused_keys in generator.unused_per_link.items():
             print(f"  {link_name}: {', '.join(unused_keys)}")
+
+    # Display validation report
+    _display_validation_report(generator.validation_report)
 
     print(f"\nWriting {output_file}...")
     output_file.write_text(urdf_xml)

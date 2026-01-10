@@ -15,13 +15,13 @@ constants:
   caster_back: -0.12
   caster_z: -0.05
 
-  lidar_post_width: 0.01
-  lidar_post_height: 0.09
-  lidar_post_z: 0.05
+  laser_post_width: 0.01
+  laser_post_height: 0.09
+  laser_post_z: 0.05
 
-  lidar_radius: 0.03
-  lidar_height: 0.05
-  lidar_z: 0.05
+  laser_radius: 0.03
+  laser_height: 0.05
+  laser_z: 0.05
 
   imu_width: 0.02
   imu_height: 0.01
@@ -57,15 +57,15 @@ hierarchy:
       right_wheel:
       caster:
       imu_link:
-        imu_top:
-        imu_bottom:
-        imu_front:
-        imu_back:
-        imu_left:
-        imu_right:
-      origin_marker:
-      lidar_post:
-        lidar:
+        imu_top_link:
+        imu_bottom_link:
+        imu_front_link:
+        imu_back_link:
+        imu_left_link:
+        imu_right_link:
+      origin_marker_link:
+      laser_post_link:
+      laser:
 
 links:
   base_footprint: {}
@@ -88,41 +88,41 @@ links:
     sphere: [$caster_radius]
     material: gray
 
-  lidar_post:
-    box: [$lidar_post_width, $lidar_post_width, $lidar_post_height]
+  laser_post_link:
+    box: [$laser_post_width, $laser_post_width, $laser_post_height]
     material: blue
 
-  lidar:
-    cylinder: [$lidar_radius, $lidar_height]
+  laser:
+    cylinder: [$laser_radius, $laser_height]
     material: red
 
   imu_link: {}
 
-  imu_top:
+  imu_top_link:
     box: [$imu_length, $imu_width, $imu_face_thickness]
     material: blue
 
-  imu_bottom:
+  imu_bottom_link:
     box: [$imu_white_length, $imu_white_width, $imu_face_thickness]
     material: white
 
-  imu_front:
+  imu_front_link:
     box: [$imu_face_thickness, $imu_width, $imu_height]
     material: red
 
-  imu_back:
+  imu_back_link:
     box: [$imu_face_thickness, $imu_white_width, $imu_white_height]
     material: white
 
-  imu_left:
+  imu_left_link:
     box: [$imu_length, $imu_face_thickness, $imu_height]
     material: green
 
-  imu_right:
+  imu_right_link:
     box: [$imu_white_length, $imu_face_thickness, $imu_white_height]
     material: white
 
-  origin_marker:
+  origin_marker_link:
     sphere: [$marker_radius]
     material: yellow
 
@@ -143,33 +143,33 @@ joints:
   caster:
     xyz: [$caster_back, 0, $caster_z]
 
-  lidar_post:
-    xyz: [0, 0, $lidar_post_z]
+  laser_post_link:
+    xyz: [0, 0, $laser_post_z]
 
-  lidar:
-    xyz: [0, 0, $lidar_z]
+  laser:
+    xyz: [0, 0, 0.10]
 
   imu_link:
     xyz: [$imu_forward, 0, $imu_z]
-    rpy: [0, 0, 0]
+    rpy: [90deg, 0, 180deg]
 
-  imu_top:
+  imu_top_link:
     xyz: [0, 0, $imu_top_z]
 
-  imu_bottom:
+  imu_bottom_link:
     xyz: [0, 0, $imu_bottom_z]
 
-  imu_front:
+  imu_front_link:
     xyz: [$imu_front_x, 0, 0]
 
-  imu_back:
+  imu_back_link:
     xyz: [$imu_back_x, 0, 0]
 
-  imu_left:
+  imu_left_link:
     xyz: [0, $imu_left_y, 0]
 
-  imu_right:
+  imu_right_link:
     xyz: [0, $imu_right_y, 0]
 
-  origin_marker:
+  origin_marker_link:
     xyz: [0, 0, 0]

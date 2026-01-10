@@ -13,6 +13,8 @@ class UrdfGenerator:
         self.joints_created: list[str] = []
         self.links_created: list[str] = []
         self.materials_defined: set[str] = set()  # Track defined materials
+        self.validation_report: dict = {}  # TF validation and lint results
+        self.joint_properties: dict = {}  # Store joint properties for validation
 
     def generate(self, data: dict) -> str:
         # Track all keys
@@ -49,6 +51,9 @@ class UrdfGenerator:
         # Record unused top-level keys
         self.unused_top_level = sorted(all_keys - used_keys)
 
+        # Validate and generate report
+        self._validate_urdf(data)
+
         return self._to_xml_string(robot)
 
     def _add_link(self, robot: ET.Element, name: str, data: dict):
@@ -76,6 +81,8 @@ class UrdfGenerator:
                 used_link_keys.add("octagon")
             elif "hexagon" in data:
                 used_link_keys.add("hexagon")
+            elif "mesh" in data:
+                used_link_keys.add("mesh")
 
             rpy = data.get("rpy")
             if rpy is not None:
@@ -96,7 +103,7 @@ class UrdfGenerator:
         if unused:
             self.unused_per_link[name] = unused
 
-    def _get_geometry(self, data: dict) -> tuple[str, list]:
+    def _get_geometry(self, data: dict) -> tuple[str, list | dict]:
         if "box" in data:
             return "box", data["box"]
         if "cylinder" in data:
@@ -107,20 +114,22 @@ class UrdfGenerator:
             return "octagon", data["octagon"]
         if "hexagon" in data:
             return "hexagon", data["hexagon"]
+        if "mesh" in data:
+            return "mesh", data["mesh"]
         raise ValueError("No geometry found in link data")
 
-    def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list, material: str = None):
+    def _add_visual_geom(self, link: ET.Element, geom_type: str, dims: list | dict, rpy: list, material: str = None):
         visual = ET.SubElement(link, "visual")
         if rpy:
             self._add_origin(visual, rpy)
         geometry = ET.SubElement(visual, "geometry")
         self._add_geometry_elem(geometry, geom_type, dims)
 
-        # Add material reference if specified
-        if material:
+        # Add material reference if specified (but not for meshes - they use their own materials)
+        if material and geom_type != "mesh":
             ET.SubElement(visual, "material", name=material)
 
-    def _add_collision_geom(self, link: ET.Element, geom_type: str, dims: list, rpy: list):
+    def _add_collision_geom(self, link: ET.Element, geom_type: str, dims: list | dict, rpy: list):
         collision = ET.SubElement(link, "collision")
         if rpy:
             self._add_origin(collision, rpy)
@@ -131,7 +140,7 @@ class UrdfGenerator:
         rpy_str = " ".join(str(v) for v in rpy)
         ET.SubElement(parent, "origin", rpy=rpy_str)
 
-    def _add_geometry_elem(self, geom: ET.Element, geom_type: str, dims: list):
+    def _add_geometry_elem(self, geom: ET.Element, geom_type: str, dims: list | dict):
         if geom_type == "box":
             size_str = " ".join(str(d) for d in dims)
             ET.SubElement(geom, "box", size=size_str)
@@ -149,6 +158,27 @@ class UrdfGenerator:
             # In production, would generate hexagonal mesh
             geom.append(ET.Comment(" Hexagon approximated as cylinder "))
             ET.SubElement(geom, "cylinder", radius=str(dims[0]), length=str(dims[1]))
+        elif geom_type == "mesh":
+            # Mesh: can be either a string (filename) or dict with filename and optional scale
+            if isinstance(dims, str):
+                # Simple format: mesh: "package://robot/meshes/base.stl"
+                ET.SubElement(geom, "mesh", filename=dims)
+            elif isinstance(dims, dict):
+                # Dictionary format with filename and optional scale
+                filename = dims.get("filename")
+                if not filename:
+                    raise ValueError("Mesh geometry requires 'filename' key")
+
+                mesh_attrs = {"filename": filename}
+
+                # Add scale if specified
+                if "scale" in dims:
+                    scale = dims["scale"]
+                    mesh_attrs["scale"] = " ".join(str(s) for s in scale)
+
+                ET.SubElement(geom, "mesh", **mesh_attrs)
+            else:
+                raise ValueError(f"Invalid mesh format: {dims}")
 
     def _add_joints_from_hierarchy(self, robot: ET.Element, hierarchy: dict, joints: dict):
         # Track which children are referenced in hierarchy
@@ -207,6 +237,14 @@ class UrdfGenerator:
 
         self.joints_created.append(joint_name)
 
+        # Store properties for validation
+        self.joint_properties[joint_name] = {
+            "type": joint_type,
+            "parent": parent,
+            "child": child,
+            "axis": axis
+        }
+
     def _add_materials(self, robot: ET.Element, materials: dict):
         """Add material definitions to the robot.
 
@@ -217,6 +255,97 @@ class UrdfGenerator:
             rgba_str = " ".join(str(v) for v in rgba)
             ET.SubElement(material, "color", rgba=rgba_str)
             self.materials_defined.add(name)
+
+    def _validate_urdf(self, data: dict):
+        """Validate URDF structure and check naming conventions."""
+
+        # Standard ROS frame names
+        STANDARD_FRAMES = {
+            "base_footprint": "Ground contact reference frame",
+            "base_link": "Main robot body frame",
+            "odom": "Odometry frame (usually in TF tree, not URDF)",
+            "map": "Map frame (usually in TF tree, not URDF)",
+        }
+
+        # Standard sensor frame suffixes
+        SENSOR_SUFFIXES = ["_link", "_frame"]
+
+        # Known sensor prefixes
+        SENSOR_PREFIXES = ["camera", "lidar", "laser", "imu", "gps", "depth", "rgb", "sonar", "ultrasonic"]
+
+        # Check link naming
+        standard_links = []
+        sensor_links = []
+        non_standard_links = []
+
+        for link_name in self.links_created:
+            if link_name in STANDARD_FRAMES:
+                standard_links.append({
+                    "name": link_name,
+                    "description": STANDARD_FRAMES[link_name]
+                })
+            elif any(link_name.startswith(prefix) for prefix in SENSOR_PREFIXES):
+                # Check if it has proper suffix
+                has_suffix = any(link_name.endswith(suffix) for suffix in SENSOR_SUFFIXES)
+                sensor_links.append({
+                    "name": link_name,
+                    "standard": has_suffix,
+                    "suggestion": f"{link_name}_link" if not has_suffix else None
+                })
+            elif link_name.endswith("_link") or link_name.endswith("_frame"):
+                # Has standard suffix but not a known sensor
+                standard_links.append({
+                    "name": link_name,
+                    "description": "Uses standard _link suffix"
+                })
+            else:
+                # Check if it's a wheel or structural element
+                if "wheel" in link_name or "caster" in link_name:
+                    standard_links.append({
+                        "name": link_name,
+                        "description": "Drive/support component"
+                    })
+                else:
+                    non_standard_links.append(link_name)
+
+        # Lint checks
+        lint_warnings = []
+        lint_info = []
+
+        # Check for links without geometry
+        links_data = data.get("links", {})
+        for link_name in self.links_created:
+            link_data = links_data.get(link_name, {})
+            if not link_data:
+                lint_info.append(f"Link '{link_name}' has no geometry (reference frame)")
+
+        # Check joints needing axis
+        for joint_name, props in self.joint_properties.items():
+            joint_type = props["type"]
+            axis = props["axis"]
+
+            if joint_type in ["revolute", "continuous", "prismatic"] and not axis:
+                lint_warnings.append(
+                    f"Joint '{joint_name}' is type '{joint_type}' but has no axis defined"
+                )
+
+        # Check for potential base_footprint issues
+        if "base_footprint" in self.links_created:
+            # Check if it's a child of something (it should be root)
+            is_child = any(props["child"] == "base_footprint" for props in self.joint_properties.values())
+            if is_child:
+                lint_warnings.append(
+                    "base_footprint should typically be the root frame, not a child"
+                )
+
+        # Store validation results
+        self.validation_report = {
+            "standard_frames": standard_links,
+            "sensor_frames": sensor_links,
+            "non_standard_frames": non_standard_links,
+            "lint_warnings": lint_warnings,
+            "lint_info": lint_info
+        }
 
     def _to_xml_string(self, root: ET.Element) -> str:
         ET.indent(root, space="  ")

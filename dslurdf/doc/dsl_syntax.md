@@ -269,11 +269,46 @@ hexagon: [radius, length]
 - `length`: Height of prism (meters)
 - Currently approximated as cylinder in URDF with comment
 
+#### Mesh
+```yaml
+# Simple format with absolute path
+mesh: "file:///absolute/path/to/model.obj"
+
+# Or with ROS package URI (recommended)
+mesh: "package://robot_name/meshes/base.stl"
+
+# Dictionary format (with optional scale)
+mesh:
+  filename: "file:///absolute/path/to/model.dae"
+  scale: [1, 1, 1]
+```
+- `filename`: Path to mesh file (typically .obj, .dae, or .stl)
+  - **IMPORTANT**: Use absolute paths or ROS package URIs - relative paths won't work in visualizers
+  - ROS package URI format: `package://package_name/path/to/mesh.stl`
+  - Absolute path format: `file:///absolute/path/to/mesh.obj`
+  - Relative paths like `"cube.obj"` will fail in RViz/Gazebo
+- `scale`: Optional scaling factor [x, y, z] (defaults to [1, 1, 1] if not specified)
+- Supported formats:
+  - **OBJ** (with .mtl for colors) - Best for Autodesk Fusion exports
+  - **DAE** (Collada with embedded materials) - Best for ROS/colored meshes
+  - **STL** (geometry only, no colors)
+
+**Format Options:**
+1. **Simple string**: Just the filename (scale defaults to [1, 1, 1])
+2. **Dictionary**: Filename with optional scale parameter
+
+**Note on materials**:
+- Mesh geometries use colors/materials defined in the mesh file itself
+- For OBJ files: The `.mtl` file must be in the same directory as the `.obj` file
+- For DAE files: Materials are embedded in the file
+- Any `material:` property specified in DURDF for a mesh link will be ignored
+- To see colors in visualizers, always use absolute paths or package URIs
+
 ### Link Properties
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| Geometry | See above | No* | One of: cylinder, box, sphere, octagon, hexagon |
+| Geometry | See above | No* | One of: cylinder, box, sphere, octagon, hexagon, mesh |
 | `material` | string | No | Material name (from materials section) |
 | `rpy` | `[r, p, y]` | No | Visual geometry rotation in radians |
 
@@ -501,8 +536,7 @@ rpy: [90deg, 0, 0]       # 90° - intuitive and readable
 - ❌ Templates (`templates:` section)
 - ❌ Mirroring operators
 - ❌ Axis shortcuts (`axis: y`)
-- ❌ Dictionary geometry format (`{radius: 0.15, length: 0.05}`)
-- ❌ Mesh files
+- ❌ Dictionary geometry format (`{radius: 0.15, length: 0.05}`) for primitive shapes
 - ❌ Mass/inertia specifications
 - ❌ Explicit collision overrides
 - ❌ Constant expressions (e.g., `$width * 2`) - only simple substitution is supported
@@ -510,6 +544,7 @@ rpy: [90deg, 0, 0]       # 90° - intuitive and readable
 **Implemented:**
 - ✅ Constants with `$variable_name` substitution
 - ✅ Degree notation (`90deg`, `180deg`, etc.)
+- ✅ Mesh files (with optional scale parameter)
 
 **See**: [dsl_syntax_futures.md](dsl_syntax_futures.md) for planned features
 
