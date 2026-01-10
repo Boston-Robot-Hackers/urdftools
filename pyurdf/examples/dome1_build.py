@@ -9,7 +9,7 @@ This demonstrates building a two-tier platform robot with:
 - Front directional marker
 """
 
-import pyurdf.lib.urdfbuilder as ub
+from pyurdf import urdfbuilder as ub
 from dome1_params import Dome1Params as p
 import math
 

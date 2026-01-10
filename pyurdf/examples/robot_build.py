@@ -2,7 +2,7 @@
 Example robot definition using urdfbuilder API
 """
 
-import pyurdf.lib.urdfbuilder as ub
+from pyurdf import urdfbuilder as ub
 from robot_params import RobotParams as p
 
 # Create robot with base hierarchy

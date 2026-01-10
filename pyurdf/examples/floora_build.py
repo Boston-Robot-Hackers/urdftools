@@ -7,7 +7,7 @@ This demonstrates building a 4-caster mobile robot with:
 - Each caster has bearing (vertical rotation) and wheel (horizontal rotation)
 """
 
-import pyurdf.lib.urdfbuilder as ub
+from pyurdf import urdfbuilder as ub
 from floora_params import FlooraParams as p
 import math
 

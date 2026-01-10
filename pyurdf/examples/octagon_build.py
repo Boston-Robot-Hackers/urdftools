@@ -2,11 +2,7 @@
 Build script for simple octagon robot using urdfbuilder API
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../lib'))
-
-import urdfbuilder as ub
+from pyurdf import urdfbuilder as ub
 from octagon_params import OctagonParams as p
 
 # Create robot with base hierarchy

@@ -2,7 +2,7 @@
 Simple differential drive robot - Python Builder API
 """
 
-import pyurdf.lib.urdfbuilder as ub
+from pyurdf import urdfbuilder as ub
 import math
 
 # Parameters
