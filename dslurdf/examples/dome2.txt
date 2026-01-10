@@ -1,0 +1,14 @@
+
+A diff drive robot with two wheels and a caster
+It has a base that is circular, 3mm thick and 15cm in radius
+The wheels are each 7cm diameter and 2cm wide
+The wheels are 10cm apart and forward 10cm from the center
+The caster is centered in the back and 12cm back from the center
+The lidar is centerd on the base and 10cm high. The lidar has a square post holding up.
+The lidar itself is a cylinder 3cm radius and 5cm tall
+The imu is 3cm forward of the center and 5cm above the base
+the imu is oriented with x facing back and z out the left side of the robot
+
+build a durdf yaml file for this robot
+Define all the constants in front.
+Call it dome2.durdf

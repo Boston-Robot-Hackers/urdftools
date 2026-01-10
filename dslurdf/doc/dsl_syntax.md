@@ -9,11 +9,13 @@
 
 ## Overview
 
-DURDF achieves 43-60% code reduction through:
+DURDF achieves 30-60% code reduction through:
 - **Flat syntax**: Geometry as top-level properties
 - **Smart defaults**: Auto-collision, fixed joints
 - **Hierarchy-first**: TF tree visible at top of file
 - **Array shorthand**: Concise geometry definitions
+- **Constants**: Reusable named values with `$variable_name` syntax
+- **Degree notation**: Intuitive `90deg` instead of radians
 
 ---
 
@@ -21,6 +23,9 @@ DURDF achieves 43-60% code reduction through:
 
 ```yaml
 robot: <name>                # Required: Robot name
+
+constants:                   # Optional: Named constants for reuse
+  <name>: <value>
 
 materials:                   # Optional: Custom material definitions
   <material_name>: [r, g, b, a]
@@ -59,7 +64,52 @@ robot: my_robot_name
 
 ---
 
-## 2. Materials Section (Optional)
+## 2. Constants Section (Optional)
+
+Define named constants that can be reused throughout the file:
+
+```yaml
+constants:
+  base_radius: 0.15
+  wheel_radius: 0.030
+  wheel_width: 0.0175
+  wheel_spacing: 0.125
+  ninety_deg: 1.5708
+```
+
+**Usage:**
+
+Reference constants using `$variable_name` syntax:
+
+```yaml
+links:
+  base_link:
+    cylinder: [$base_radius, 0.003]
+
+  left_wheel:
+    cylinder: [$wheel_radius, $wheel_width]
+    rpy: [$ninety_deg, 0, 0]
+
+joints:
+  left_wheel:
+    xyz: [0, $wheel_spacing, 0]
+```
+
+**Rules:**
+- Constants are simple name-value pairs
+- Values are typically numeric (dimensions, angles, etc.)
+- Reference with `$name` anywhere in materials, hierarchy, joints, or links sections
+- Substitution happens at load time (before URDF generation)
+- Unknown constant references will raise an error
+
+**Benefits:**
+- Change dimensions in one place
+- Self-documenting code with meaningful names
+- Consistent values across related components
+
+---
+
+## 3. Materials Section (Optional)
 
 Define custom materials once, reference by name:
 
@@ -83,7 +133,7 @@ links:
 
 ---
 
-## 3. Hierarchy Section (Required)
+## 4. Hierarchy Section (Required)
 
 Defines the TF tree (parent-child relationships):
 
@@ -128,7 +178,7 @@ hierarchy:
 
 ---
 
-## 4. Joints Section (Optional)
+## 5. Joints Section (Optional)
 
 Specify joint properties for children in hierarchy:
 
@@ -164,7 +214,7 @@ joints:
 
 ---
 
-## 5. Links Section (Required)
+## 6. Links Section (Required)
 
 Define geometry and visual properties:
 
@@ -236,17 +286,24 @@ Rotates the visual (and collision) geometry:
 ```yaml
 left_wheel:
   cylinder: [0.035, 0.02]
-  rpy: [1.5708, 0, 0]        # Rotate 90° around X-axis
+  rpy: [90deg, 0, 0]         # Rotate 90° around X-axis
 ```
 
-**Common rotations (radians):**
-- 90° = 1.5708
-- 180° = 3.1416
-- 270° = 4.7124
+**Degree notation:**
+Use the `deg` suffix for intuitive angle specification:
+- `90deg` = 90 degrees (π/2 radians)
+- `180deg` = 180 degrees (π radians)
+- `45.5deg` = 45.5 degrees
+- `-90deg` = -90 degrees
+
+You can also use radians directly:
+```yaml
+rpy: [1.5708, 0, 0]          # Same as [90deg, 0, 0]
+```
 
 ---
 
-## 6. Smart Defaults
+## 7. Smart Defaults
 
 ### Auto-Collision
 
@@ -297,6 +354,15 @@ links:
 ```yaml
 robot: simple_bot
 
+constants:
+  base_height: 0.05
+  base_radius: 0.15
+  base_thickness: 0.003
+  wheel_radius: 0.035
+  wheel_width: 0.02
+  wheel_spacing: 0.10
+  wheel_drop: -0.015
+
 materials:
   clear: [0.9, 0.9, 0.9, 0.3]
   black: [0, 0, 0, 1]
@@ -309,37 +375,38 @@ hierarchy:
 
 joints:
   base_link:
-    xyz: [0, 0, 0.05]
+    xyz: [0, 0, $base_height]
 
   left_wheel:
     type: continuous
-    xyz: [0, 0.10, -0.015]
+    xyz: [0, $wheel_spacing, $wheel_drop]
     axis: [0, 1, 0]
 
   right_wheel:
     type: continuous
-    xyz: [0, -0.10, -0.015]
+    xyz: [0, -$wheel_spacing, $wheel_drop]
     axis: [0, 1, 0]
 
 links:
   base_footprint: {}
 
   base_link:
-    octagon: [0.15, 0.003]
+    octagon: [$base_radius, $base_thickness]
     material: clear
 
   left_wheel:
-    cylinder: [0.035, 0.02]
-    rpy: [1.5708, 0, 0]
+    cylinder: [$wheel_radius, $wheel_width]
+    rpy: [90deg, 0, 0]
     material: black
 
   right_wheel:
-    cylinder: [0.035, 0.02]
-    rpy: [1.5708, 0, 0]
+    cylinder: [$wheel_radius, $wheel_width]
+    rpy: [90deg, 0, 0]
     material: black
 ```
 
-**Result**: 49 lines (vs 80 lines URDF = 39% reduction)
+**Result**: 53 lines (vs 80 lines URDF = 34% reduction)
+**Note**: Degree notation and constants improve readability
 
 ---
 
@@ -366,11 +433,31 @@ Warning: joints section for 'sensor' has no matching child in hierarchy
 
 ## Best Practices
 
-### 1. Hierarchy First
+### 1. Use Constants for Dimensions
+Define dimensions once, reuse with meaningful names:
+
+```yaml
+constants:
+  wheel_radius: 0.035
+  wheel_spacing: 0.10
+
+links:
+  left_wheel:
+    cylinder: [$wheel_radius, 0.02]
+
+joints:
+  left_wheel:
+    xyz: [0, $wheel_spacing, 0]
+```
+
+### 2. Hierarchy First
 Put hierarchy at top so robot structure is immediately visible:
 
 ```yaml
 robot: my_robot
+
+constants:          # ← Dimensions defined once
+  ...
 
 hierarchy:          # ← Robot structure visible here
   base:
@@ -381,7 +468,7 @@ joints:             # ← Details below
   ...
 ```
 
-### 2. Use Comments
+### 3. Use Comments
 YAML comments explain intent:
 
 ```yaml
@@ -390,7 +477,7 @@ joints:
     xyz: [0, 0, 0.05]    # 5cm above ground
 ```
 
-### 3. Empty Links for Frames
+### 4. Empty Links for Frames
 Use `{}` for reference frames:
 
 ```yaml
@@ -398,12 +485,12 @@ links:
   base_footprint: {}     # Ground projection
 ```
 
-### 4. Consistent Units
-Always use meters and radians:
+### 5. Consistent Units
+Always use meters for distances. For angles, prefer degree notation:
 
 ```yaml
 cylinder: [0.15, 0.05]   # 15cm radius, 5cm height (in meters)
-rpy: [1.5708, 0, 0]      # 90° in radians
+rpy: [90deg, 0, 0]       # 90° - intuitive and readable
 ```
 
 ---
@@ -411,15 +498,18 @@ rpy: [1.5708, 0, 0]      # 90° in radians
 ## Limitations (Current Implementation)
 
 **Not yet implemented:**
-- ❌ Parameters/variables (`params:` section)
 - ❌ Templates (`templates:` section)
 - ❌ Mirroring operators
-- ❌ Degree angle notation (`90deg`)
 - ❌ Axis shortcuts (`axis: y`)
 - ❌ Dictionary geometry format (`{radius: 0.15, length: 0.05}`)
 - ❌ Mesh files
 - ❌ Mass/inertia specifications
 - ❌ Explicit collision overrides
+- ❌ Constant expressions (e.g., `$width * 2`) - only simple substitution is supported
+
+**Implemented:**
+- ✅ Constants with `$variable_name` substitution
+- ✅ Degree notation (`90deg`, `180deg`, etc.)
 
 **See**: [dsl_syntax_futures.md](dsl_syntax_futures.md) for planned features
 

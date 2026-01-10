@@ -1,0 +1,175 @@
+robot: dome2
+
+constants:
+  base_radius: 0.15
+  base_thickness: 0.003
+  base_height: 0.05
+
+  wheel_radius: 0.030
+  wheel_width: 0.0175
+  wheel_forward: 0.10
+  wheel_spacing: 0.125
+  wheel_drop: -0.03
+
+  caster_radius: 0.015
+  caster_back: -0.12
+  caster_z: -0.05
+
+  lidar_post_width: 0.01
+  lidar_post_height: 0.09
+  lidar_post_z: 0.05
+
+  lidar_radius: 0.03
+  lidar_height: 0.05
+  lidar_z: 0.05
+
+  imu_width: 0.02
+  imu_height: 0.01
+  imu_length: 0.03
+  imu_forward: 0.03
+  imu_z: 0.053
+  imu_face_thickness: 0.001
+  imu_white_width: 0.016
+  imu_white_height: 0.008
+  imu_white_length: 0.026
+  imu_top_z: 0.0045
+  imu_bottom_z: -0.0040
+  imu_front_x: 0.0145
+  imu_back_x: -0.0140
+  imu_left_y: 0.0095
+  imu_right_y: -0.0090
+
+  marker_radius: 0.001
+
+materials:
+  gray: [0.5, 0.5, 0.5, 1.0]
+  black: [0, 0, 0, 1]
+  red: [1, 0, 0, 1]
+  blue: [0.3, 0.3, 0.8, 1]
+  green: [0, 0.8, 0, 1]
+  yellow: [1, 1, 0, 1]
+  white: [1, 1, 1, 1]
+
+hierarchy:
+  base_footprint:
+    base_link:
+      left_wheel:
+      right_wheel:
+      caster:
+      imu_link:
+        imu_top:
+        imu_bottom:
+        imu_front:
+        imu_back:
+        imu_left:
+        imu_right:
+      origin_marker:
+      lidar_post:
+        lidar:
+
+links:
+  base_footprint: {}
+
+  base_link:
+    cylinder: [$base_radius, $base_thickness]
+    material: gray
+
+  left_wheel:
+    cylinder: [$wheel_radius, $wheel_width]
+    rpy: [90deg, 0, 0]
+    material: black
+
+  right_wheel:
+    cylinder: [$wheel_radius, $wheel_width]
+    rpy: [90deg, 0, 0]
+    material: black
+
+  caster:
+    sphere: [$caster_radius]
+    material: gray
+
+  lidar_post:
+    box: [$lidar_post_width, $lidar_post_width, $lidar_post_height]
+    material: blue
+
+  lidar:
+    cylinder: [$lidar_radius, $lidar_height]
+    material: red
+
+  imu_link: {}
+
+  imu_top:
+    box: [$imu_length, $imu_width, $imu_face_thickness]
+    material: blue
+
+  imu_bottom:
+    box: [$imu_white_length, $imu_white_width, $imu_face_thickness]
+    material: white
+
+  imu_front:
+    box: [$imu_face_thickness, $imu_width, $imu_height]
+    material: red
+
+  imu_back:
+    box: [$imu_face_thickness, $imu_white_width, $imu_white_height]
+    material: white
+
+  imu_left:
+    box: [$imu_length, $imu_face_thickness, $imu_height]
+    material: green
+
+  imu_right:
+    box: [$imu_white_length, $imu_face_thickness, $imu_white_height]
+    material: white
+
+  origin_marker:
+    sphere: [$marker_radius]
+    material: yellow
+
+joints:
+  base_link:
+    xyz: [0, 0, $base_height]
+
+  left_wheel:
+    type: continuous
+    xyz: [$wheel_forward, $wheel_spacing, $wheel_drop]
+    axis: [0, 1, 0]
+
+  right_wheel:
+    type: continuous
+    xyz: [$wheel_forward, -$wheel_spacing, $wheel_drop]
+    axis: [0, 1, 0]
+
+  caster:
+    xyz: [$caster_back, 0, $caster_z]
+
+  lidar_post:
+    xyz: [0, 0, $lidar_post_z]
+
+  lidar:
+    xyz: [0, 0, $lidar_z]
+
+  imu_link:
+    xyz: [$imu_forward, 0, $imu_z]
+    rpy: [0, 0, 0]
+
+  imu_top:
+    xyz: [0, 0, $imu_top_z]
+
+  imu_bottom:
+    xyz: [0, 0, $imu_bottom_z]
+
+  imu_front:
+    xyz: [$imu_front_x, 0, 0]
+
+  imu_back:
+    xyz: [$imu_back_x, 0, 0]
+
+  imu_left:
+    xyz: [0, $imu_left_y, 0]
+
+  imu_right:
+    xyz: [0, $imu_right_y, 0]
+
+  origin_marker:
+    xyz: [0, 0, 0]

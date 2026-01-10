@@ -23,6 +23,10 @@ class UrdfGenerator:
         used_keys.add("robot")
         robot = ET.Element("robot", name=robot_name)
 
+        # Constants are handled by the loader, mark as used
+        if "constants" in data:
+            used_keys.add("constants")
+
         # Add material definitions first
         if "materials" in data:
             used_keys.add("materials")
