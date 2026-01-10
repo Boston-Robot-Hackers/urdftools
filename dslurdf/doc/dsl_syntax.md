@@ -1,6 +1,6 @@
 # DURDF Syntax Specification
 
-**DURDF** (Dynamic URDF) is a YAML-based Domain-Specific Language for ROS2 robot descriptions.
+**DURDF** (Domain Specific Language for URDF) is a YAML-based DSL for ROS2 robot descriptions.
 
 **Status**: This document reflects the **current implementation** (v0.1.0)
 **See also**: [dsl_syntax_futures.md](dsl_syntax_futures.md) for planned features

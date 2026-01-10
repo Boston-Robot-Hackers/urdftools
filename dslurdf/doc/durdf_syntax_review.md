@@ -7,7 +7,7 @@
 
 ## Summary
 
-DURDF (Dynamic URDF) is a YAML-based DSL for robot descriptions. This review compares the documented syntax in `dsl_syntax.md` with the actual implementation in `urdf_generator.py`.
+DURDF (Domain Specific Language for URDF) is a YAML-based DSL for robot descriptions. This review compares the documented syntax in `dsl_syntax.md` with the actual implementation in `urdf_generator.py`.
 
 ---
 
