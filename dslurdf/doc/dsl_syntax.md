@@ -1,369 +1,464 @@
-# URDF DSL Syntax Specification
+# DURDF Syntax Specification
 
-Formal grammar specification for the YAML-based URDF Domain-Specific Language.
+**DURDF** (Dynamic URDF) is a YAML-based Domain-Specific Language for ROS2 robot descriptions.
 
-## Notation
-
-- `<non-terminal>` - production rule
-- `::=` - defined as
-- `|` - alternative
-- `[element]` - optional (zero or one)
-- `{element}` - repetition (zero or more)
-- `element+` - one or more
-- Terminal symbols are in quotes or UPPERCASE
+**Status**: This document reflects the **current implementation** (v0.1.0)
+**See also**: [dsl_syntax_futures.md](dsl_syntax_futures.md) for planned features
 
 ---
 
-## Top-Level Structure
+## Overview
 
-```bnf
-<robot-spec> ::= <robot-decl> <hierarchy-section> [<params-section>] [<templates-section>] <links-section>
+DURDF achieves 43-60% code reduction through:
+- **Flat syntax**: Geometry as top-level properties
+- **Smart defaults**: Auto-collision, fixed joints
+- **Hierarchy-first**: TF tree visible at top of file
+- **Array shorthand**: Concise geometry definitions
 
-<robot-decl> ::= "robot:" IDENTIFIER
+---
+
+## File Structure
+
+```yaml
+robot: <name>                # Required: Robot name
+
+materials:                   # Optional: Custom material definitions
+  <material_name>: [r, g, b, a]
+
+hierarchy:                   # Required: Parent-child tree structure
+  <root_link>:
+    <child_link>:
+      - <grandchild1>
+      - <grandchild2>
+
+joints:                      # Optional: Joint properties
+  <child_link>:              # Keyed by child link name
+    type: <joint_type>
+    xyz: [x, y, z]
+    axis: [x, y, z]
+
+links:                       # Required: Link geometries
+  <link_name>:
+    <geometry>: [params]
+    material: <name>
+    rpy: [r, p, y]
 ```
 
 ---
 
-## Hierarchy Section
+## 1. Robot Declaration
 
-```bnf
-<hierarchy-section> ::= "hierarchy:" <hierarchy-tree>
-
-<hierarchy-tree> ::= <link-ref> [<children-list>]
-
-<children-list> ::= "-" <link-ref> ":" <nested-children>
-                  | "-" <link-ref>
-
-<nested-children> ::= {"-" <link-ref> [":" <nested-children>]}
-
-<link-ref> ::= IDENTIFIER
+```yaml
+robot: my_robot_name
 ```
 
-**Example:**
+**Rules:**
+- Must be first line
+- Alphanumeric with underscores
+- Used as `<robot name="...">` in URDF
+
+---
+
+## 2. Materials Section (Optional)
+
+Define custom materials once, reference by name:
+
+```yaml
+materials:
+  clear: [0.9, 0.9, 0.9, 0.3]     # RGBA values (0-1)
+  black: [0, 0, 0, 1]
+  my_color: [0.5, 0.2, 0.8, 1.0]
+```
+
+**Format:**
+- `[r, g, b, a]` where each value is 0.0 to 1.0
+- `r` = red, `g` = green, `b` = blue, `a` = alpha (transparency)
+
+**Usage:**
+```yaml
+links:
+  base_link:
+    material: clear           # Reference by name
+```
+
+---
+
+## 3. Hierarchy Section (Required)
+
+Defines the TF tree (parent-child relationships):
+
+### Format 1: Nested Dictionary
+
 ```yaml
 hierarchy:
-  root_link:
-    - child1
-    - child2:
-        - grandchild1
-        - grandchild2
+  base_footprint:
+    base_link:
+      left_wheel:
+      right_wheel:
 ```
+
+### Format 2: List of Children
+
+```yaml
+hierarchy:
+  base_footprint:
+    base_link:
+      - left_wheel
+      - right_wheel
+      - lidar
+```
+
+### Format 3: Mixed (Nested with Lists)
+
+```yaml
+hierarchy:
+  base_footprint:
+    base_link:              # Nested child
+      - left_wheel          # List of children
+      - right_wheel
+      lidar:                # Nested child with descendants
+        - camera
+```
+
+**Rules:**
+- Root link has no parent (e.g., `base_footprint`)
+- Indentation shows parent-child relationships
+- Each child automatically gets a joint to its parent
+- Joint names auto-generated: `{parent}_to_{child}`
 
 ---
 
-## Parameters Section
+## 4. Joints Section (Optional)
 
-```bnf
-<params-section> ::= "params:" {<param-def>}
+Specify joint properties for children in hierarchy:
 
-<param-def> ::= IDENTIFIER ":" <scalar-value>
-              | IDENTIFIER ":" <vector-value>
+```yaml
+joints:
+  base_link:                 # Child link name (NOT joint name)
+    xyz: [0, 0, 0.05]       # Position relative to parent
 
-<scalar-value> ::= NUMBER
+  left_wheel:
+    type: continuous        # Joint type
+    xyz: [0, 0.10, -0.015]
+    axis: [0, 1, 0]         # Rotation axis
 
-<vector-value> ::= "[" NUMBER {"," NUMBER} "]"
+  right_wheel:
+    type: continuous
+    xyz: [0, -0.10, -0.015]
+    axis: [0, 1, 0]
 ```
+
+### Joint Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `type` | string | `fixed` | `fixed`, `continuous`, `revolute`, `prismatic` |
+| `xyz` | `[x, y, z]` | `[0, 0, 0]` | Position offset from parent |
+| `rpy` | `[r, p, y]` | `[0, 0, 0]` | Rotation offset (radians) |
+| `axis` | `[x, y, z]` | - | Rotation/translation axis (required for continuous/revolute/prismatic) |
+
+**Notes:**
+- If omitted, joint defaults to `type: fixed` with no offset
+- Joint name auto-generated from hierarchy
+- `axis` required for `continuous` and `revolute` joints
 
 ---
 
-## Templates Section
+## 5. Links Section (Required)
 
-```bnf
-<templates-section> ::= "templates:" {<template-def>}
+Define geometry and visual properties:
 
-<template-def> ::= IDENTIFIER ":" <link-properties>
+```yaml
+links:
+  base_footprint: {}         # Empty link (reference frame only)
+
+  base_link:
+    octagon: [0.15, 0.003]   # Geometry
+    material: clear          # Material reference
+
+  left_wheel:
+    cylinder: [0.035, 0.02]
+    rpy: [1.5708, 0, 0]     # Visual rotation (radians)
+    material: black
 ```
 
----
+### Geometry Types
 
-## Links Section
-
-```bnf
-<links-section> ::= "links:" {<link-def>}
-
-<link-def> ::= <simple-link-def>
-             | <template-instances-def>
-             | <mirror-def>
-
-<simple-link-def> ::= IDENTIFIER ":" <link-properties>
-
-<link-properties> ::= {<geometry-spec> | <material-spec> | <origin-spec> | <joint-spec> | <mass-spec>}
-
-<template-instances-def> ::= IDENTIFIER ":" "template:" IDENTIFIER "instances:" <instance-list>
-                              | IDENTIFIER ":" "template:" IDENTIFIER "at:" <instance-map>
-
-<instance-list> ::= "-" "{" "name:" IDENTIFIER "," [<property-overrides>] "}" +
-
-<instance-map> ::= "{" <instance-entry> {"," <instance-entry>} "}"
-
-<instance-entry> ::= IDENTIFIER ":" <origin-value>
-
-<mirror-def> ::= IDENTIFIER ":" "template:" IDENTIFIER "mirror_y:" <mirror-spec>
-
-<mirror-spec> ::= "origin:" <origin-value> "names:" "[" IDENTIFIER "," IDENTIFIER "]"
-                | <origin-value>                                                         # Auto-generates left_/right_ names
+#### Cylinder
+```yaml
+cylinder: [radius, length]
 ```
+- `radius`: Cylinder radius (meters)
+- `length`: Cylinder height (meters)
 
----
-
-## Geometry Specifications
-
-```bnf
-<geometry-spec> ::= <cylinder-spec>
-                  | <box-spec>
-                  | <sphere-spec>
-                  | <mesh-spec>
-                  | <polygon-spec>
-
-<cylinder-spec> ::= "cylinder:" "{" "radius:" <expression> "," "length:" <expression> "}"
-                  | "cylinder:" "[" <expression> "," <expression> "]"              # Array shorthand [radius, length]
-
-<box-spec> ::= "box:" "{" "size:" <vector-expr> "}"
-             | "box:" <vector-expr>                                               # Array shorthand [x, y, z]
-
-<sphere-spec> ::= "sphere:" "{" "radius:" <expression> "}"
-                | "sphere:" <expression>                                          # Scalar shorthand (radius)
-
-<mesh-spec> ::= "mesh:" "{" "filename:" STRING ["," "scale:" <vector-expr>] "}"
-
-<polygon-spec> ::= <hexagon-spec>
-                 | <octagon-spec>
-                 | <ngon-spec>
-
-<hexagon-spec> ::= "hexagon:" "{" "radius:" <expression> "," "length:" <expression> "}"
-                 | "hexagon:" "[" <expression> "," <expression> "]"               # Array shorthand [radius, length]
-
-<octagon-spec> ::= "octagon:" "{" "radius:" <expression> "," "length:" <expression> "}"
-                 | "octagon:" "[" <expression> "," <expression> "]"               # Array shorthand [radius, length]
-
-<ngon-spec> ::= "polygon:" "{" "sides:" NUMBER "," "radius:" <expression> "," "length:" <expression> "}"
+#### Box
+```yaml
+box: [x, y, z]
 ```
+- `x, y, z`: Dimensions in meters
 
-**Polygon Geometry Notes:**
-- `hexagon`: 6-sided regular polygon (prism)
-- `octagon`: 8-sided regular polygon (prism)
-- `polygon`: N-sided regular polygon (prism) for arbitrary side counts
+#### Sphere
+```yaml
+sphere: [radius]
+```
+- `radius`: Sphere radius (meters)
+
+#### Octagon (8-sided prism)
+```yaml
+octagon: [radius, length]
+```
 - `radius`: Distance from center to vertex (circumradius)
-- `length`: Height/thickness of the prism along Z-axis
-- Polygons are oriented with a flat edge parallel to Y-axis by default
+- `length`: Height of prism (meters)
+- Currently approximated as cylinder in URDF with comment
+
+#### Hexagon (6-sided prism)
+```yaml
+hexagon: [radius, length]
+```
+- `radius`: Distance from center to vertex (circumradius)
+- `length`: Height of prism (meters)
+- Currently approximated as cylinder in URDF with comment
+
+### Link Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| Geometry | See above | No* | One of: cylinder, box, sphere, octagon, hexagon |
+| `material` | string | No | Material name (from materials section) |
+| `rpy` | `[r, p, y]` | No | Visual geometry rotation in radians |
+
+\* Geometry can be omitted for reference frames (e.g., `base_footprint: {}`)
+
+### Visual Rotation (rpy)
+
+Rotates the visual (and collision) geometry:
+
+```yaml
+left_wheel:
+  cylinder: [0.035, 0.02]
+  rpy: [1.5708, 0, 0]        # Rotate 90° around X-axis
+```
+
+**Common rotations (radians):**
+- 90° = 1.5708
+- 180° = 3.1416
+- 270° = 4.7124
 
 ---
 
-## Material Specification
+## 6. Smart Defaults
 
-```bnf
-<material-spec> ::= "material:" <material-ref>
+### Auto-Collision
 
-<material-ref> ::= IDENTIFIER           # Named material from library
-                 | <rgba-value>         # Custom RGBA
+Collision geometry is automatically generated identical to visual geometry:
 
-<rgba-value> ::= "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+```yaml
+base_link:
+  cylinder: [0.15, 0.05]
 ```
 
-**Built-in Materials:**
-```
-red | blue | green | yellow | orange | purple | black | white | gray |
-coral | sage | gold | steel | plum | terracotta | seafoam | mustard |
-dusty_rose | charcoal | slate | light_blue | darkblue | aluminum |
-copper | brass | chrome | plastic | rubber | carbon_fiber
-```
-
----
-
-## Coordinate Specifications
-
-```bnf
-<origin-spec> ::= "origin:" <origin-value>
-
-<origin-value> ::= "{" ["xyz:" <vector-expr>] ["," "rpy:" <vector-expr>] "}"
-                 | <vector-expr>                                                  # Shorthand for xyz-only (no rotation)
-                 | <rotation-shortcut>                                            # Single-axis rotation shortcut
-
-<rotation-shortcut> ::= "{" "xyz:" <vector-expr> "," <single-axis-rotation> "}"
-
-<single-axis-rotation> ::= "rot_x:" <angle>
-                         | "rot_y:" <angle>
-                         | "rot_z:" <angle>
-
-<angle> ::= <expression> ["deg"]                                                  # Angle in radians or degrees
-
-<vector-expr> ::= "[" <expression> "," <expression> "," <expression> "]"
-                | "{" IDENTIFIER "}"                                              # Reference to vector parameter
+Generates:
+```xml
+<visual>
+  <geometry>
+    <cylinder radius="0.15" length="0.05"/>
+  </geometry>
+</visual>
+<collision>
+  <geometry>
+    <cylinder radius="0.15" length="0.05"/>  <!-- Auto-generated -->
+  </geometry>
+</collision>
 ```
 
----
+### Fixed Joints
 
-## Joint Specifications
+If `type` omitted in joints section, defaults to `fixed`:
 
-```bnf
-<joint-spec> ::= [<joint-type-spec>] [<joint-axis-spec>] [<joint-limits-spec>]
-
-<joint-type-spec> ::= "joint_type:" <joint-type>
-
-<joint-type> ::= "fixed" | "revolute" | "continuous" | "prismatic" | "floating" | "planar"
-
-<joint-axis-spec> ::= "axis:" <axis-value>
-
-<axis-value> ::= <vector-expr>
-               | <axis-shorthand>
-
-<axis-shorthand> ::= "x" | "y" | "z" | "-x" | "-y" | "-z"
-               | "+x" | "+y" | "+z"
-
-<joint-limits-spec> ::= "limits:" "{" ["lower:" NUMBER] ["," "upper:" NUMBER] ["," "effort:" NUMBER] ["," "velocity:" NUMBER] "}"
+```yaml
+joints:
+  sensor:
+    xyz: [0.1, 0, 0.2]      # Defaults to fixed joint
 ```
 
-**Axis Shorthand Mapping:**
-- `x` or `+x` → `[1, 0, 0]`
-- `y` or `+y` → `[0, 1, 0]`
-- `z` or `+z` → `[0, 0, 1]`
-- `-x` → `[-1, 0, 0]`
-- `-y` → `[0, -1, 0]`
-- `-z` → `[0, 0, -1]`
+### Empty Links
 
-**Default:** `joint_type: fixed`
+Reference frames with no physical geometry:
 
----
-
-## Mass and Inertia Specifications
-
-```bnf
-<mass-spec> ::= "mass:" <expression>
-
-<inertial-spec> ::= "inertial:" <inertial-value>
-
-<inertial-value> ::= "auto"                    # Auto-calculate from geometry + mass
-                   | <inertia-matrix>
-
-<inertia-matrix> ::= "{" "ixx:" NUMBER "," "ixy:" NUMBER "," "ixz:" NUMBER ","
-                          "iyy:" NUMBER "," "iyz:" NUMBER "," "izz:" NUMBER "}"
+```yaml
+links:
+  base_footprint: {}         # Valid - no geometry
 ```
-
-**Default:** Inertia is auto-calculated from geometry and mass if not specified.
-
----
-
-## Expressions
-
-```bnf
-<expression> ::= <term> {<addop> <term>}
-
-<term> ::= <factor> {<mulop> <factor>}
-
-<factor> ::= NUMBER
-           | "{" IDENTIFIER "}"                      # Parameter reference
-           | "{" <expression> "}"                    # Parenthesized expression
-           | "-" <factor>                            # Negation
-
-<addop> ::= "+" | "-"
-
-<mulop> ::= "*" | "/" | "%"
-
-<vector-expr> ::= "[" <expression> "," <expression> "," <expression> "]"
-```
-
-**Variable Substitution:**
-- `{param_name}` - Simple parameter reference
-- `{param1 + param2}` - Arithmetic expression
-- `{wheel_base/2}` - Division
-- `{(top - bottom)/2}` - Parenthesized expression
-
-**Angular Units:**
-- `90deg` - Degrees (converted to radians: π/2)
-- `1.57` - Radians (used as-is)
-
----
-
-## Semantic Rules
-
-### 1. Link References
-- All links referenced in `hierarchy` MUST be defined in `links` section
-- Template-generated links (instances, mirrors) are implicitly defined
-
-### 2. Parameter Scope
-- Parameters defined in `params` are globally accessible
-- Variable substitution uses `{param_name}` syntax
-- Arithmetic expressions are evaluated at compile time
-
-### 3. Template Expansion
-- **Instances:** Generate N links from one template with property overrides
-- **Mirrors:** Generate exactly 2 links (left/right) with Y-axis mirroring
-- Template properties are inherited unless overridden in instances
-
-### 4. Smart Defaults
-- `origin`: `{xyz: [0, 0, 0], rpy: [0, 0, 0]}` if omitted
-- `joint_type`: `fixed` if omitted
-- `collision`: Equals visual geometry if omitted
-- `inertial`: Auto-calculated from geometry + mass if `mass` specified but `inertial` omitted
-
-### 5. Coordinate Frames
-- `xyz`: Translation in meters `[x, y, z]`
-- `rpy`: Rotation in radians or degrees `[roll, pitch, yaw]`
-- Right-handed coordinate system (ROS REP 103)
-
-### 6. Type Inference
-- Geometry type inferred from key: `cylinder:`, `box:`, `sphere:`, `mesh:`, `hexagon:`, `octagon:`, `polygon:`
-- Joint type inferred from `joint_type:` field, defaults to `fixed`
-- Material type inferred: named string or RGBA array
 
 ---
 
 ## Complete Example
 
 ```yaml
-robot: example_bot
+robot: simple_bot
+
+materials:
+  clear: [0.9, 0.9, 0.9, 0.3]
+  black: [0, 0, 0, 1]
 
 hierarchy:
   base_footprint:
-    - base_link:
-        - left_wheel
-        - right_wheel
+    base_link:
+      - left_wheel
+      - right_wheel
 
-params:
-  wheel_radius: 0.05
-  wheel_width: 0.02
-  wheel_separation: 0.3
+joints:
+  base_link:
+    xyz: [0, 0, 0.05]
 
-templates:
-  wheel:
-    cylinder: [{wheel_radius}, {wheel_width}]        # Array shorthand
-    material: steel
-    joint_type: continuous
-    axis: y                                          # Axis shorthand
-    mass: 0.5
+  left_wheel:
+    type: continuous
+    xyz: [0, 0.10, -0.015]
+    axis: [0, 1, 0]
+
+  right_wheel:
+    type: continuous
+    xyz: [0, -0.10, -0.015]
+    axis: [0, 1, 0]
 
 links:
-  base_footprint:
-    # Virtual link, no geometry
+  base_footprint: {}
 
   base_link:
-    box: [0.4, 0.3, 0.1]                            # Array shorthand
-    material: gray
-    mass: 5.0
+    octagon: [0.15, 0.003]
+    material: clear
 
-  wheels:
-    template: wheel
-    mirror_y: {xyz: [0, {wheel_separation/2}, 0], rot_x: 90deg}  # Rotation shortcut, auto-generated names
+  left_wheel:
+    cylinder: [0.035, 0.02]
+    rpy: [1.5708, 0, 0]
+    material: black
+
+  right_wheel:
+    cylinder: [0.035, 0.02]
+    rpy: [1.5708, 0, 0]
+    material: black
 ```
 
-**Simplifications Shown:**
-- `cylinder: [r, l]` - Array geometry shorthand
-- `box: [x, y, z]` - Array geometry shorthand
-- `axis: y` - Axis shorthand (instead of `[0, 1, 0]`)
-- `rot_x: 90deg` - Single-axis rotation shortcut (instead of `rpy: [90deg, 0, 0]`)
-- Auto-generated mirror names: `left_wheel`, `right_wheel` inferred from template name
----
-
-## Validation Rules
-
-1. **Syntax validation:** YAML must be well-formed
-2. **Structural validation:** All referenced links/params must exist
-3. **Type validation:** Expressions must evaluate to correct types
-4. **Semantic validation:** Hierarchy must form a tree (no cycles)
-5. **Physics validation:** Mass > 0 for non-virtual links
-6. **REP compliance:** Optional warnings for non-standard frame names
+**Result**: 49 lines (vs 80 lines URDF = 39% reduction)
 
 ---
 
-**Version:** 1.0
-**Last Updated:** 2025-12-20
+## Validation & Warnings
+
+The compiler tracks and warns about:
+
+### Unused Top-Level Sections
+```
+Warning: Section 'params' not recognized (ignored)
+```
+
+### Unused Link Properties
+```
+Warning: Link 'wheel' has unused properties: ['mass', 'inertia']
+```
+
+### Joints Without Hierarchy
+```
+Warning: joints section for 'sensor' has no matching child in hierarchy
+```
+
+---
+
+## Best Practices
+
+### 1. Hierarchy First
+Put hierarchy at top so robot structure is immediately visible:
+
+```yaml
+robot: my_robot
+
+hierarchy:          # ← Robot structure visible here
+  base:
+    - wheel1
+    - wheel2
+
+joints:             # ← Details below
+  ...
+```
+
+### 2. Use Comments
+YAML comments explain intent:
+
+```yaml
+joints:
+  base_link:
+    xyz: [0, 0, 0.05]    # 5cm above ground
+```
+
+### 3. Empty Links for Frames
+Use `{}` for reference frames:
+
+```yaml
+links:
+  base_footprint: {}     # Ground projection
+```
+
+### 4. Consistent Units
+Always use meters and radians:
+
+```yaml
+cylinder: [0.15, 0.05]   # 15cm radius, 5cm height (in meters)
+rpy: [1.5708, 0, 0]      # 90° in radians
+```
+
+---
+
+## Limitations (Current Implementation)
+
+**Not yet implemented:**
+- ❌ Parameters/variables (`params:` section)
+- ❌ Templates (`templates:` section)
+- ❌ Mirroring operators
+- ❌ Degree angle notation (`90deg`)
+- ❌ Axis shortcuts (`axis: y`)
+- ❌ Dictionary geometry format (`{radius: 0.15, length: 0.05}`)
+- ❌ Mesh files
+- ❌ Mass/inertia specifications
+- ❌ Explicit collision overrides
+
+**See**: [dsl_syntax_futures.md](dsl_syntax_futures.md) for planned features
+
+---
+
+## Conversion to URDF
+
+Use the `durdf` command-line tool:
+
+```bash
+durdf input.durdf output.urdf
+```
+
+Or programmatically:
+
+```python
+from dslurdf import DurdfLoader, UrdfGenerator
+
+loader = DurdfLoader()
+generator = UrdfGenerator()
+
+data = loader.load("robot.durdf")
+urdf_xml = generator.generate(data)
+
+with open("robot.urdf", "w") as f:
+    f.write(urdf_xml)
+```
+
+---
+
+## See Also
+
+- [dsl_syntax_futures.md](dsl_syntax_futures.md) - Planned future features
+- [design_philosophy.md](design_philosophy.md) - Design principles
+- [dsl_approach.md](dsl_approach.md) - Approach comparison
+- [../examples/](../examples/) - Example DURDF files
+
+---
+
+**Version**: 0.1.0 (Current Implementation)
+**Last Updated**: 2026-01-09
+**Status**: Reflects actual working implementation
