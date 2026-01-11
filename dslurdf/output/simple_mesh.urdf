@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot name="simple_mesh">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="file:///Users/pitosalas/mydev/urdftools/dslurdf/examples/cube.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="file:///Users/pitosalas/mydev/urdftools/dslurdf/examples/cube.obj" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

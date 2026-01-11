@@ -23,21 +23,23 @@ constants:
   laser_height: 0.05
   laser_z: 0.05
 
+  laser_marker_length: 0.04
+  laser_marker_width: 0.002
+  laser_x_offset: 0.02
+  laser_y_offset: 0.02
+  laser_z_offset: 0.03
+
+  imu_forward: 0.03
+  imu_z: 0.053
   imu_width: 0.02
   imu_height: 0.01
   imu_length: 0.03
-  imu_forward: 0.03
-  imu_z: 0.053
-  imu_face_thickness: 0.001
-  imu_white_width: 0.016
-  imu_white_height: 0.008
-  imu_white_length: 0.026
-  imu_top_z: 0.0045
-  imu_bottom_z: -0.0040
-  imu_front_x: 0.0145
-  imu_back_x: -0.0140
-  imu_left_y: 0.0095
-  imu_right_y: -0.0090
+
+  imu_marker_length: 0.03
+  imu_marker_width: 0.002
+  imu_x_offset: 0.015
+  imu_y_offset: 0.01
+  imu_z_offset: 0.015
 
   marker_radius: 0.001
 
@@ -49,6 +51,8 @@ materials:
   green: [0, 0.8, 0, 1]
   yellow: [1, 1, 0, 1]
   white: [1, 1, 1, 1]
+  dark_red: [0.5, 0, 0, 1]
+  dark_green: [0, 0.4, 0, 1]
 
 hierarchy:
   base_footprint:
@@ -57,15 +61,15 @@ hierarchy:
       right_wheel:
       caster:
       imu_link:
-        imu_top_link:
-        imu_bottom_link:
-        imu_front_link:
-        imu_back_link:
+        imu_forward_link:
         imu_left_link:
-        imu_right_link:
+        imu_up_link:
       origin_marker_link:
       laser_post_link:
       laser:
+        laser_forward_link:
+        laser_left_link:
+        laser_up_link:
 
 links:
   base_footprint: {}
@@ -94,33 +98,35 @@ links:
 
   laser:
     cylinder: [$laser_radius, $laser_height]
+    material: dark_green
+
+  laser_forward_link:
+    box: [$laser_marker_length, $laser_marker_width, $laser_marker_width]
     material: red
 
-  imu_link: {}
-
-  imu_top_link:
-    box: [$imu_length, $imu_width, $imu_face_thickness]
-    material: blue
-
-  imu_bottom_link:
-    box: [$imu_white_length, $imu_white_width, $imu_face_thickness]
-    material: white
-
-  imu_front_link:
-    box: [$imu_face_thickness, $imu_width, $imu_height]
-    material: red
-
-  imu_back_link:
-    box: [$imu_face_thickness, $imu_white_width, $imu_white_height]
-    material: white
-
-  imu_left_link:
-    box: [$imu_length, $imu_face_thickness, $imu_height]
+  laser_left_link:
+    box: [$laser_marker_width, $laser_marker_length, $laser_marker_width]
     material: green
 
-  imu_right_link:
-    box: [$imu_white_length, $imu_face_thickness, $imu_white_height]
-    material: white
+  laser_up_link:
+    box: [$laser_marker_width, $laser_marker_width, $laser_marker_length]
+    material: blue
+
+  imu_link:
+    box: [$imu_length, $imu_width, $imu_height]
+    material: dark_red
+
+  imu_forward_link:
+    box: [$imu_marker_length, $imu_marker_width, $imu_marker_width]
+    material: red
+
+  imu_left_link:
+    box: [$imu_marker_width, $imu_marker_length, $imu_marker_width]
+    material: green
+
+  imu_up_link:
+    box: [$imu_marker_width, $imu_marker_width, $imu_marker_length]
+    material: blue
 
   origin_marker_link:
     sphere: [$marker_radius]
@@ -148,28 +154,29 @@ joints:
 
   laser:
     xyz: [0, 0, 0.10]
+    rpy: [0, 0, -90deg]
+
+  laser_forward_link:
+    xyz: [$laser_x_offset, 0, 0]
+
+  laser_left_link:
+    xyz: [0, $laser_y_offset, 0]
+
+  laser_up_link:
+    xyz: [0, 0, $laser_z_offset]
 
   imu_link:
     xyz: [$imu_forward, 0, $imu_z]
     rpy: [90deg, 0, 180deg]
 
-  imu_top_link:
-    xyz: [0, 0, $imu_top_z]
-
-  imu_bottom_link:
-    xyz: [0, 0, $imu_bottom_z]
-
-  imu_front_link:
-    xyz: [$imu_front_x, 0, 0]
-
-  imu_back_link:
-    xyz: [$imu_back_x, 0, 0]
+  imu_forward_link:
+    xyz: [$imu_x_offset, 0, 0]
 
   imu_left_link:
-    xyz: [0, $imu_left_y, 0]
+    xyz: [0, $imu_y_offset, 0]
 
-  imu_right_link:
-    xyz: [0, $imu_right_y, 0]
+  imu_up_link:
+    xyz: [0, 0, $imu_z_offset]
 
   origin_marker_link:
     xyz: [0, 0, 0]
