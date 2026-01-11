@@ -77,12 +77,12 @@ links:
   left_wheel:
     cylinder: [$wheel_radius, $wheel_width]
     rpy: [90deg, 0, 0]
-    material: black
+    material: green
 
   right_wheel:
     cylinder: [$wheel_radius, $wheel_width]
     rpy: [90deg, 0, 0]
-    material: black
+    material: red
 
   caster:
     sphere: [$caster_radius]
